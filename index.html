@@ -691,8 +691,149 @@
       navigateTo('playScreen');
     }
 
+        // --- ПОЛНОЦЕННЫЙ РЕЖИМ ОБУЧЕНИЯ (БОЙ С БОТОМ) ---
+    let isBotMatch = false;
+
     function startPvE() {
-      alert('Тренировочный режим: используйте PvP-комнаты дуэлей для тестирования всех анимаций в онлайне!');
+      if (myDeck.length !== 15) return alert('Соберите колоду из 15 карт во вкладке "Моя колода"!');
+      isBotMatch = true;
+      currentRoomId = 'bot_match';
+
+      const pDeckIds = myDeck.slice().sort(() => Math.random() - 0.5);
+      const bDeckIds = defaultDeck.slice().sort(() => Math.random() - 0.5);
+
+      const pDeck = pDeckIds.map((id, idx) => ({ ...getCardData(id), uid: 'p_' + idx + '_' + id }));
+      const bDeck = bDeckIds.map((id, idx) => ({ ...getCardData(id), uid: 'b_' + idx + '_' + id }));
+
+      gameState = {
+        turn: 1,
+        isMyTurn: true,
+        me: {
+          id: 'player',
+          name: playerName,
+          hp: 25,
+          maxMana: 1,
+          currentMana: 1,
+          fatigue: 0,
+          deck: pDeck,
+          hand: pDeck.splice(0, 3),
+          board: []
+        },
+        opp: {
+          id: 'bot',
+          name: 'Бот-Оракул 🤖',
+          hp: 25,
+          maxMana: 1,
+          currentMana: 1,
+          fatigue: 0,
+          deck: bDeck,
+          hand: 3,
+          hiddenHand: bDeck.splice(0, 3),
+          board: []
+        }
+      };
+
+      document.getElementById('playScreen').classList.add('hidden');
+      document.getElementById('battleArena').classList.remove('hidden');
+      handleServerSync(gameState);
+      addCombatLog({ text: 'Тренировочный бой с Ботом начался!', icon: '🤖' });
+    }
+
+    function getCardData(id) {
+      if (typeof CARDS_DATABASE !== 'undefined') {
+        const c = CARDS_DATABASE.find(x => x.id === id);
+        if (c) return JSON.parse(JSON.stringify(c));
+      }
+      return { id, mana: 1, name: 'Карта', type: 'minion', atk: 1, hp: 1, icon: '🗡️' };
+    }
+
+    // Ход бота
+    function runBotTurn() {
+      if (!isBotMatch) return;
+      const b = gameState.opp;
+      const p = gameState.me;
+
+      // Растет мана бота
+      if (b.maxMana < 8) b.maxMana++;
+      b.currentMana = b.maxMana;
+      b.board.forEach(m => { m.canAttack = true; });
+
+      // Добор карты ботом
+      if (b.deck.length > 0 && b.hiddenHand.length < 6) {
+        b.hiddenHand.push(b.deck.pop());
+        b.hand = b.hiddenHand.length;
+      }
+
+      addCombatLog({ text: 'Ход Бота...', icon: '⏳' });
+      handleServerSync(gameState);
+
+      setTimeout(() => {
+        // Бот выставляет карты, на которые хватает маны
+        for (let i = b.hiddenHand.length - 1; i >= 0; i--) {
+          const card = b.hiddenHand[i];
+          if (b.board.length < 4 && b.currentMana >= card.mana && card.type === 'minion') {
+            b.currentMana -= card.mana;
+            b.hiddenHand.splice(i, 1);
+            b.hand = b.hiddenHand.length;
+            b.board.push({
+              uid: 'b_board_' + Date.now() + Math.random(),
+              name: card.name,
+              atk: card.atk,
+              hp: card.hp,
+              maxHp: card.hp,
+              icon: card.icon,
+              taunt: !!card.taunt,
+              canAttack: !!card.rush
+            });
+            addCombatLog({ text: `Бот призвал: ${card.name} (${card.atk}/${card.hp})`, icon: card.icon });
+          }
+        }
+        handleServerSync(gameState);
+
+        // Бот атакует
+        setTimeout(() => {
+          b.board.forEach(m => {
+            if (!m.canAttack || m.atk <= 0) return;
+            const pTaunt = p.board.find(x => x.taunt);
+
+            if (pTaunt) {
+              pTaunt.hp -= m.atk;
+              m.hp -= pTaunt.atk;
+              addCombatLog({ text: `${m.name} ⚔️ ${pTaunt.name} (-${m.atk}/-${pTaunt.atk})`, icon: '⚔️' });
+            } else if (p.board.length > 0 && Math.random() > 0.5) {
+              const targetMinion = p.board[0];
+              targetMinion.hp -= m.atk;
+              m.hp -= targetMinion.atk;
+              addCombatLog({ text: `${m.name} ⚔️ ${targetMinion.name} (-${m.atk}/-${targetMinion.atk})`, icon: '⚔️' });
+            } else {
+              p.hp -= m.atk;
+              addCombatLog({ text: `${m.name} ударил вас в лицо (-${m.atk} HP)`, icon: '💥' });
+            }
+            m.canAttack = false;
+          });
+
+          // Чистим погибших
+          p.board = p.board.filter(x => x.hp > 0);
+          b.board = b.board.filter(x => x.hp > 0);
+
+          // Проверка на победу/поражение
+          if (p.hp <= 0 || b.hp <= 0) {
+            handleGameOver({ winner: p.hp > 0 ? 'player' : 'bot' });
+            return;
+          }
+
+          // Передача хода обратно игроку
+          if (p.maxMana < 8) p.maxMana++;
+          p.currentMana = p.maxMana;
+          p.board.forEach(m => { m.canAttack = true; });
+          if (p.deck.length > 0 && p.hand.length < 6) p.hand.push(p.deck.pop());
+
+          gameState.turn = 1;
+          gameState.isMyTurn = true;
+          addCombatLog({ text: 'Ваш ход!', icon: '⭐' });
+          handleServerSync(gameState);
+        }, 1000);
+      }, 1000);
     }
   </script>
 </body>
