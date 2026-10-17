@@ -256,6 +256,7 @@
 
     function joinRoom(roomId, bet) {
       if (balance < bet) return alert('Недостаточно монет!');
+      currentRoomId = roomId;
       if (socket?.connected) socket.emit('join_room', { roomId, guestName: playerName });
     }
 
@@ -279,8 +280,9 @@
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
     // --- БОЕВАЯ СИСТЕМА НА 3 ЛИНИИ ---
-    function setupPvPMatch(data) {
+       function setupPvPMatch(data) {
       isPvP = true;
+      if (data.roomId) currentRoomId = data.roomId;
       currentBet = data.bet;
       balance -= currentBet;
       updateBalanceDisplay();
