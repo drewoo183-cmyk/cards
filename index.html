@@ -18,119 +18,139 @@
       -webkit-overflow-scrolling: touch;
     }
     .card-taunt {
-      border-color: #e2e8f0 !important;
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.65);
+      border-color: #f8fafc !important;
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
     }
     .glow-green {
-      box-shadow: 0 0 14px #22c55e;
+      box-shadow: 0 0 15px #22c55e;
       border-color: #22c55e !important;
     }
     .glow-yellow {
-      box-shadow: 0 0 16px #eab308;
+      box-shadow: 0 0 18px #eab308;
       border-color: #eab308 !important;
     }
 
-    /* Анимация призыва на стол */
-    .spawn-pop {
-      animation: spawnPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    /* Анимация приземления карты на стол */
+    .spawn-drop {
+      animation: spawnDropAnim 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
     }
-    @keyframes spawnPop {
-      0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+    @keyframes spawnDropAnim {
+      0% { transform: scale(1.3) translateY(-30px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
     }
 
-    /* Анимация атаки и отдачи */
+    /* Анимация удара существа на столе */
     .attack-lunge-up {
-      animation: lungeUp 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      animation: lungeUpAnim 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
       z-index: 50;
     }
-    @keyframes lungeUp {
+    @keyframes lungeUpAnim {
       0% { transform: translateY(0) scale(1); }
-      45% { transform: translateY(-46px) scale(1.18); }
+      45% { transform: translateY(-55px) scale(1.22); }
       100% { transform: translateY(0) scale(1); }
     }
 
     .attack-lunge-down {
-      animation: lungeDown 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      animation: lungeDownAnim 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
       z-index: 50;
     }
-    @keyframes lungeDown {
+    @keyframes lungeDownAnim {
       0% { transform: translateY(0) scale(1); }
-      45% { transform: translateY(46px) scale(1.18); }
+      45% { transform: translateY(55px) scale(1.22); }
       100% { transform: translateY(0) scale(1); }
     }
 
+    /* Тряска цели при ударе */
     .damage-shake {
-      animation: shake 0.38s cubic-bezier(.36,.07,.19,.97) both;
+      animation: shakeAnim 0.38s cubic-bezier(.36,.07,.19,.97) both;
     }
-    @keyframes shake {
+    @keyframes shakeAnim {
       10%, 90% { transform: translate3d(-3px, 0, 0); }
       20%, 80% { transform: translate3d(4px, 0, 0); }
       30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
       40%, 60% { transform: translate3d(5px, 0, 0); }
     }
 
+    /* Всплывающий урон */
     .floating-text {
-      animation: floatUp 1.2s ease-out forwards;
+      animation: floatUpAnim 1.2s ease-out forwards;
       pointer-events: none;
     }
-    @keyframes floatUp {
+    @keyframes floatUpAnim {
       0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-38px) scale(1.35); }
+      100% { opacity: 0; transform: translateY(-40px) scale(1.4); }
     }
 
-    /* Раскладка карт в руке веером (НЕ ПРОСВЕЧИВАЕТ) */
+    /* ЗОНА РУКИ: КАРТЫ УВЕЛИЧЕНЫ И ДОХОДЯТ ПОЧТИ ДО НИКА */
     .hand-container {
       position: relative;
       width: 100%;
-      height: 124px;
+      height: 155px; /* Увеличенная высота */
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding-bottom: 4px;
+      padding-bottom: 2px;
     }
     .hand-card-arc {
       position: absolute;
       transition: transform 0.22s ease-out, box-shadow 0.22s ease-out;
       transform-origin: bottom center;
-      background-color: #0f172a !important; /* Полностью непрозрачный фон */
+      background-color: #0f172a !important; /* Полностью непрозрачный */
       opacity: 1 !important;
-      box-shadow: -4px 4px 12px rgba(0, 0, 0, 0.7);
+      box-shadow: -4px 6px 14px rgba(0, 0, 0, 0.8);
+      touch-action: none;
     }
     .hand-card-arc.selected {
-      transform: translateY(-36px) scale(1.22) rotate(0deg) !important;
+      transform: translateY(-52px) scale(1.22) rotate(0deg) !important;
       z-index: 60 !important;
-      box-shadow: 0 0 18px #f59e0b !important;
+      box-shadow: 0 0 20px #f59e0b !important;
       border-color: #f59e0b !important;
+    }
+
+    /* Полет карты за пальцем */
+    .card-dragging {
+      position: fixed !important;
+      pointer-events: none !important;
+      z-index: 100 !important;
+      transform: scale(1.25) !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 20px #38bdf8 !important;
+      transition: none !important;
+    }
+
+    /* Подсветка стола при перетаскивании */
+    .board-drop-active {
+      border-color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.15) !important;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.3);
     }
 
     /* Правая вертикальная лента истории */
     .combat-log-rail {
       position: absolute;
-      right: 4px;
-      top: 50px;
-      bottom: 140px;
-      width: 42px;
+      right: 6px;
+      top: 55px;
+      bottom: 165px;
+      width: 44px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
       align-items: center;
-      z-index: 25;
+      z-index: 30;
       pointer-events: auto;
     }
     .combat-log-bubble {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 9999px;
       background: #0f172a;
-      border: 1.5px solid #334155;
+      border: 2px solid #334155;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
       cursor: pointer;
-      transition: transform 0.15s;
+      transition: transform 0.15s, border-color 0.15s;
     }
     .combat-log-bubble:active {
       transform: scale(0.9);
@@ -264,7 +284,7 @@
       </button>
     </div>
 
-    <!-- ПРАВАЯ ВЕРТИКАЛЬНАЯ ЛЕНТА ИСТОРИИ (С ТАПОМ ДЛЯ ДЕТАЛЕЙ) -->
+    <!-- ПРАВАЯ ВЕРТИКАЛЬНАЯ ЛЕНТА ИСТОРИИ -->
     <div id="combatLogRail" class="combat-log-rail custom-scroll"></div>
 
     <!-- ПОЛЕ СУЩЕСТВ ОППОНЕНТА -->
@@ -295,7 +315,7 @@
       </div>
     </div>
 
-    <!-- ВЕЕР НЕПРОЗРАЧНЫХ КАРТ В РУКЕ -->
+    <!-- КРУПНЫЙ ВЕЕР КАРТ В РУКЕ -->
     <div class="w-full bg-gradient-to-t from-slate-950 via-slate-950 to-transparent pt-1">
       <div id="myHand" class="hand-container"></div>
     </div>
@@ -341,7 +361,7 @@
       <p>Цель: снизить здоровье героя соперника до 0 HP.</p>
       <div class="border-t border-slate-800 pt-2 space-y-1.5">
         <p>💎 <b>Мана:</b> растет от 1 до 8 кристаллов каждый ход.</p>
-        <p>🖐️ <b>Розыгрыш:</b> нажмите на карту в руке ➔ затем на зону стола.</p>
+        <p>🖐️ <b>Розыгрыш:</b> нажмите на карту в руке ➔ она выдвинется, после чего потяните её на стол!</p>
         <p>⚔️ <b>Атака:</b> выберите существо на столе (зеленое свечение) ➔ затем цель.</p>
         <p>🛡️ <b>Провокация:</b> существа со щитом защищают героя, пока не погибнут.</p>
       </div>
@@ -546,15 +566,14 @@
 
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
-    // --- ИСТОРИЯ БОЯ СПРАВА И ДЕТАЛЬНЫЙ ПРОСМОТР ---
+    // --- ПРАВАЯ ЛЕНТА ИСТОРИИ И ДЕТАЛЬНЫЙ ПРОСМОТР ---
     function addCombatLog(entry) {
       combatLogs.unshift(entry);
       if (combatLogs.length > 25) combatLogs.pop();
 
-      // Обновляем боковую ленту (последние 7 действий)
       const rail = document.getElementById('combatLogRail');
       const latest = combatLogs.slice(0, 7);
-      rail.innerHTML = latest.map((l, idx) => `
+      rail.innerHTML = latest.map(l => `
         <div onclick="openDetailedLog()" class="combat-log-bubble" title="${l.text}">
           ${l.icon || '⚔️'}
         </div>
@@ -565,26 +584,26 @@
       haptic('light');
       const content = document.getElementById('detailedLogContent');
       content.innerHTML = combatLogs.map(l => `
-        <div class="p-2 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center gap-2">
-          <span class="text-lg">${l.icon || '⚔️'}</span>
-          <div class="text-[11px] text-slate-200">${l.text}</div>
+        <div class="p-2.5 bg-slate-950/90 rounded-2xl border border-slate-800 flex items-center gap-2.5">
+          <span class="text-xl">${l.icon || '⚔️'}</span>
+          <div class="text-xs text-slate-200 leading-snug">${l.text}</div>
         </div>
       `).join('');
       toggleModal('detailedLogModal', true);
     }
 
-    // --- АНИМАЦИИ ВЫПАДА, ПРИЗЫВА И УРОНА ---
+    // --- АНИМАЦИИ УДАРА И ТРЯСКИ ---
     function triggerCardAttackAnimation(attackerUid, targetId) {
       const atkEl = document.getElementById(`minion_${attackerUid}`);
       const isOppAttacking = gameState?.me?.board?.some(m => m.uid === attackerUid) === false;
 
       if (atkEl) {
         atkEl.classList.remove('attack-lunge-down', 'attack-lunge-up');
-        void atkEl.offsetWidth; // сброс reflow для перезапуска CSS
+        void atkEl.offsetWidth;
         atkEl.classList.add(isOppAttacking ? 'attack-lunge-down' : 'attack-lunge-up');
         setTimeout(() => {
           atkEl.classList.remove('attack-lunge-down', 'attack-lunge-up');
-        }, 360);
+        }, 380);
       }
 
       let targetEl = null;
@@ -595,7 +614,7 @@
       if (targetEl) {
         setTimeout(() => {
           targetEl.classList.add('damage-shake');
-          setTimeout(() => targetEl.classList.remove('damage-shake'), 380);
+          setTimeout(() => targetEl.classList.remove('damage-shake'), 400);
         }, 160);
       }
     }
@@ -609,7 +628,7 @@
       float.className = `floating-text absolute top-0 text-sm font-black z-50 ${isHeal ? 'text-emerald-400' : 'text-red-500'}`;
       float.innerText = text;
       targetEl.appendChild(float);
-      setTimeout(() => float.remove(), 1150);
+      setTimeout(() => float.remove(), 1180);
       haptic(isHeal ? 'light' : 'medium');
     }
 
@@ -651,7 +670,7 @@
         const canAtk = isMine && gameState?.isMyTurn && m.canAttack && m.atk > 0;
         return `
           <div id="minion_${m.uid}" onclick="${isMine ? `selectBoardMinion('${m.uid}')` : `targetOppMinion('${m.uid}')`}" 
-               class="spawn-pop w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
+               class="spawn-drop w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
             <span class="text-xl text-center">${m.icon}</span>
             <span class="text-[9px] font-bold text-center truncate">${m.name}</span>
             <div class="flex justify-between text-[11px] font-black">
@@ -664,14 +683,19 @@
       }).join('');
     }
 
-    // --- НЕПРОЗРАЧНЫЙ ВЕЕР В РУКЕ ---
+    // --- УВЕЛИЧЕННЫЙ ВЕЕР КАРТ В РУКЕ И ДРАГ-ЭНД-ДРОП ---
+    let dragCardObj = null;
+    let dragElement = null;
+    let startTouchY = 0;
+
     function renderArcHand(hand) {
       const c = document.getElementById('myHand');
       const total = hand.length;
       if (total === 0) { c.innerHTML = ''; return; }
 
-      const cardWidth = 62;
-      const spacing = total > 4 ? 36 : 48;
+      // Увеличенная ширина и нахлест
+      const cardWidth = 86;
+      const spacing = total > 4 ? 44 : 56;
       const startX = -((total - 1) * spacing) / 2;
 
       c.innerHTML = hand.map((card, idx) => {
@@ -680,47 +704,98 @@
         
         const posX = startX + idx * spacing;
         const normalizedIdx = total > 1 ? (idx - (total - 1) / 2) : 0;
-        const rotateDeg = normalizedIdx * 4;
-        const translateY = Math.abs(normalizedIdx) * 3;
+        const rotateDeg = normalizedIdx * 3.5;
+        const translateY = Math.abs(normalizedIdx) * 4;
 
         return `
           <div id="handcard_${card.uid}"
-               onclick="handleCardTap('${card.uid}')"
+               data-uid="${card.uid}"
                style="left: calc(50% + ${posX}px - ${cardWidth/2}px); transform: translateY(${translateY}px) rotate(${rotateDeg}deg); z-index: ${idx + 10};"
-               class="hand-card-arc ${isSel ? 'selected' : ''} w-[62px] h-[94px] rounded-xl border ${canPlay ? 'border-emerald-500 bg-slate-900 shadow-lg shadow-emerald-950/50' : 'border-slate-700 bg-slate-900 opacity-100'} p-1.5 flex flex-col justify-between cursor-pointer">
+               class="hand-card-arc ${isSel ? 'selected' : ''} w-[86px] h-[128px] rounded-2xl border-2 ${canPlay ? 'border-emerald-500/90 bg-slate-900 shadow-xl shadow-emerald-950/40' : 'border-slate-700 bg-slate-900'} p-2 flex flex-col justify-between cursor-pointer">
             <div class="flex justify-between items-center">
-              <span class="w-4 h-4 rounded-full bg-cyan-600 text-white font-black text-[9px] flex items-center justify-center">${card.mana}</span>
-              <span class="text-base">${card.icon}</span>
+              <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-black text-xs flex items-center justify-center">${card.mana}</span>
+              <span class="text-2xl">${card.icon}</span>
             </div>
-            <span class="text-[9px] font-bold text-center leading-tight truncate text-slate-100">${card.name}</span>
+            <div class="text-[11px] font-bold text-center leading-tight truncate text-slate-100">${card.name}</div>
             ${card.type === 'minion' ? `
-              <div class="flex justify-between text-[10px] font-black">
-                <span class="${card.atk > 0 ? 'text-amber-400' : 'text-slate-500'}">${card.atk}</span>
-                <span class="text-red-400">${card.hp}</span>
+              <div class="flex justify-between text-xs font-black pt-1">
+                <span class="${card.atk > 0 ? 'text-amber-400' : 'text-slate-500'}">⚔️${card.atk}</span>
+                <span class="text-red-400">❤️${card.hp}</span>
               </div>` : `
-              <div class="text-[8px] text-center font-bold text-indigo-400">Закл</div>`
+              <div class="text-[10px] text-center font-bold text-indigo-400">Заклинание</div>`
             }
           </div>
         `;
       }).join('');
+
+      initHandCardInteractions();
     }
 
-    function handleCardTap(uid) {
+    function initHandCardInteractions() {
+      const items = document.querySelectorAll('.hand-card-arc');
+      items.forEach(el => {
+        el.addEventListener('touchstart', onCardTouchStart, { passive: false });
+        el.addEventListener('touchmove', onCardTouchMove, { passive: false });
+        el.addEventListener('touchend', onCardTouchEnd);
+      });
+    }
+
+    function onCardTouchStart(e) {
       if (!gameState?.isMyTurn) return;
+      const uid = this.getAttribute('data-uid');
       const card = gameState.me.hand.find(c => c.uid === uid);
       if (!card || gameState.me.currentMana < card.mana) return;
 
-      if (selectedHandCard?.uid === uid) {
-        selectedHandCard = null;
-      } else {
+      dragCardObj = card;
+      dragElement = this;
+      startTouchY = e.touches[0].clientY;
+
+      // Если карта еще не была выдвинута вверх — выдвигаем её
+      if (selectedHandCard?.uid !== uid) {
         selectedHandCard = card;
         selectedBoardMinion = null;
         haptic('light');
+        renderArcHand(gameState.me.hand);
       }
-      renderArcHand(gameState.me.hand);
     }
 
-    // Тап по столу для розыгрыша с анимацией появления
+    function onCardTouchMove(e) {
+      if (!dragCardObj || !dragElement) return;
+      const touch = e.touches[0];
+      const deltaY = startTouchY - touch.clientY;
+
+      // Если потянули вверх больше чем на 18px — включаем режим перетаскивания на стол
+      if (deltaY > 18) {
+        e.preventDefault();
+        dragElement.classList.add('card-dragging');
+        dragElement.style.left = `${touch.clientX - 43}px`;
+        dragElement.style.top = `${touch.clientY - 64}px`;
+        document.getElementById('myBoardDropZone').classList.add('board-drop-active');
+      }
+    }
+
+    function onCardTouchEnd(e) {
+      if (!dragCardObj || !dragElement) return;
+
+      const dropZone = document.getElementById('myBoardDropZone').getBoundingClientRect();
+      const cardRect = dragElement.getBoundingClientRect();
+      const droppedOnBoard = cardRect.top < dropZone.bottom && cardRect.bottom > dropZone.top;
+
+      dragElement.classList.remove('card-dragging');
+      document.getElementById('myBoardDropZone').classList.remove('board-drop-active');
+
+      if (droppedOnBoard && dragCardObj.type === 'minion') {
+        playSelectedMinion(dragCardObj);
+      } else {
+        // Если просто тапнули без перетаскивания на поле — оставляем выдвинутой
+        renderArcHand(gameState.me.hand);
+      }
+
+      dragCardObj = null;
+      dragElement = null;
+    }
+
+    // Тап по столу для розыгрыша выдвинутой карты
     document.getElementById('myBoardDropZone').onclick = function() {
       if (!gameState?.isMyTurn || !selectedHandCard) return;
       if (selectedHandCard.type === 'minion') {
@@ -846,7 +921,7 @@
       navigateTo('playScreen');
     }
 
-    // --- БОТ-ОРКУЛ (ОБУЧЕНИЕ) ---
+    // --- БОТ-ОРАКУЛ (ОБУЧЕНИЕ) ---
     function getCardData(id) {
       if (typeof CARDS_DATABASE !== 'undefined') {
         const c = CARDS_DATABASE.find(x => x.id === id);
@@ -1022,7 +1097,7 @@
         }
         handleServerSync(gameState);
 
-        // Фаза атак бота с рывком и тряской
+        // Фаза атак бота
         setTimeout(() => {
           b.board.forEach(m => {
             if (!m.canAttack || m.atk <= 0) return;
@@ -1055,7 +1130,7 @@
             return;
           }
 
-          // Передача хода игроку
+          // Возврат хода игроку
           setTimeout(() => {
             if (p.maxMana < 8) p.maxMana++;
             p.currentMana = p.maxMana;
