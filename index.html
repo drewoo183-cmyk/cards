@@ -18,26 +18,35 @@
       -webkit-overflow-scrolling: touch;
     }
     .card-taunt {
-      border-color: #cbd5e1 !important;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.55);
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.65);
     }
     .glow-green {
-      box-shadow: 0 0 12px #22c55e;
+      box-shadow: 0 0 14px #22c55e;
       border-color: #22c55e !important;
     }
     .glow-yellow {
-      box-shadow: 0 0 14px #eab308;
+      box-shadow: 0 0 16px #eab308;
       border-color: #eab308 !important;
     }
 
-    /* Анимации атаки и тряски */
+    /* Анимация призыва на стол */
+    .spawn-pop {
+      animation: spawnPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes spawnPop {
+      0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    /* Анимация атаки и отдачи */
     .attack-lunge-up {
       animation: lungeUp 0.35s cubic-bezier(0.25, 1, 0.5, 1);
       z-index: 50;
     }
     @keyframes lungeUp {
       0% { transform: translateY(0) scale(1); }
-      40% { transform: translateY(-38px) scale(1.15); }
+      45% { transform: translateY(-46px) scale(1.18); }
       100% { transform: translateY(0) scale(1); }
     }
 
@@ -47,86 +56,91 @@
     }
     @keyframes lungeDown {
       0% { transform: translateY(0) scale(1); }
-      40% { transform: translateY(38px) scale(1.15); }
+      45% { transform: translateY(46px) scale(1.18); }
       100% { transform: translateY(0) scale(1); }
     }
 
     .damage-shake {
-      animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+      animation: shake 0.38s cubic-bezier(.36,.07,.19,.97) both;
     }
     @keyframes shake {
-      10%, 90% { transform: translate3d(-2px, 0, 0); }
-      20%, 80% { transform: translate3d(3px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-      40%, 60% { transform: translate3d(4px, 0, 0); }
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+      40%, 60% { transform: translate3d(5px, 0, 0); }
     }
 
     .floating-text {
-      animation: floatUp 1.1s ease-out forwards;
+      animation: floatUp 1.2s ease-out forwards;
       pointer-events: none;
     }
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-32px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-38px) scale(1.35); }
     }
 
-    /* Раскладка карт в руке веером */
+    /* Раскладка карт в руке веером (НЕ ПРОСВЕЧИВАЕТ) */
     .hand-container {
       position: relative;
       width: 100%;
-      height: 120px;
+      height: 124px;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
     }
     .hand-card-arc {
       position: absolute;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: transform 0.22s ease-out, box-shadow 0.22s ease-out;
       transform-origin: bottom center;
+      background-color: #0f172a !important; /* Полностью непрозрачный фон */
+      opacity: 1 !important;
+      box-shadow: -4px 4px 12px rgba(0, 0, 0, 0.7);
     }
     .hand-card-arc.selected {
-      transform: translateY(-32px) scale(1.2) rotate(0deg) !important;
+      transform: translateY(-36px) scale(1.22) rotate(0deg) !important;
       z-index: 60 !important;
-      box-shadow: 0 0 16px #f59e0b;
+      box-shadow: 0 0 18px #f59e0b !important;
+      border-color: #f59e0b !important;
     }
 
     /* Правая вертикальная лента истории */
     .combat-log-rail {
       position: absolute;
       right: 4px;
-      top: 55px;
+      top: 50px;
       bottom: 140px;
-      width: 38px;
+      width: 42px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       align-items: center;
       z-index: 25;
       pointer-events: auto;
     }
     .combat-log-bubble {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1.5px solid rgba(148, 163, 184, 0.25);
+      background: #0f172a;
+      border: 1.5px solid #334155;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-      animation: fadeIn 0.3s ease-out;
+      font-size: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition: transform 0.15s;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateX(10px); }
-      to { opacity: 1; transform: translateX(0); }
+    .combat-log-bubble:active {
+      transform: scale(0.9);
+      border-color: #f59e0b;
     }
   </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex flex-col font-sans">
 
-  <!-- ШАПКА МЕНЮ -->
+  <!-- ШАПКА -->
   <header id="appHeader" class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center sticky top-0 z-20">
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center font-bold text-xs">⚔️</div>
@@ -232,29 +246,28 @@
   <!-- ЭКРАН 4: СТОЛ МАТЧА ПО СХЕМЕ -->
   <div id="battleArena" class="hidden fixed inset-0 bg-slate-950 z-30 flex flex-col justify-between overflow-hidden">
     
-    <!-- ВЕРХ: ЦЕНТРАЛЬНЫЙ АВАТАР ОППОНЕНТА (КРАСНАЯ ЗОНА 1) -->
+    <!-- ВЕРХ: ЦЕНТРАЛЬНЫЙ АВАТАР ОППОНЕНТА -->
     <div class="relative w-full pt-3 pb-1 flex flex-col items-center justify-center z-10">
       <div onclick="targetOppHero()" id="oppHeroBox" class="flex flex-col items-center cursor-pointer active:scale-95 transition">
         <div class="relative">
-          <div class="w-14 h-14 rounded-full bg-red-950/80 border-2 border-red-500/90 flex items-center justify-center text-2xl shadow-lg shadow-red-950/50">🥷</div>
+          <div class="w-14 h-14 rounded-full bg-red-950/90 border-2 border-red-500 flex items-center justify-center text-2xl shadow-lg shadow-red-950/60">🥷</div>
           <span id="oppHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-white font-black text-xs px-2 py-0.5 rounded-full border border-slate-900">25</span>
         </div>
-        <div class="flex items-center gap-1.5 mt-1 bg-slate-900/90 border border-slate-800 px-2.5 py-0.5 rounded-full">
+        <div class="flex items-center gap-1.5 mt-1 bg-slate-900/95 border border-slate-800 px-2.5 py-0.5 rounded-full">
           <span id="battleOppName" class="font-bold text-[11px] truncate max-w-[110px]">Враг</span>
           <span class="text-[10px] text-cyan-400 font-black">💎 <span id="oppManaText">1/1</span></span>
         </div>
       </div>
 
-      <!-- Кнопка сдачи / выхода в верхнем левом углу -->
-      <button onclick="surrenderMatch()" class="absolute left-3 top-3 text-[11px] text-slate-500 hover:text-red-400 bg-slate-900/60 px-2 py-1 rounded-lg border border-slate-800">
+      <button onclick="surrenderMatch()" class="absolute left-3 top-3 text-[11px] text-slate-500 hover:text-red-400 bg-slate-900/70 px-2.5 py-1 rounded-lg border border-slate-800">
         Сдаться
       </button>
     </div>
 
-    <!-- ПРАВАЯ ЖЕЛТАЯ ЗОНА: ВЕРТИКАЛЬНАЯ ИСТОРИЯ БОЯ -->
+    <!-- ПРАВАЯ ВЕРТИКАЛЬНАЯ ЛЕНТА ИСТОРИИ (С ТАПОМ ДЛЯ ДЕТАЛЕЙ) -->
     <div id="combatLogRail" class="combat-log-rail custom-scroll"></div>
 
-    <!-- ПОЛЕ СУЩЕСТВ ОППОНЕНТА (МАКС 4) -->
+    <!-- ПОЛЕ СУЩЕСТВ ОППОНЕНТА -->
     <div id="oppBoard" class="h-24 flex justify-center items-center gap-2 px-10 my-1"></div>
 
     <!-- ЗОНА СТОЛА ИГРОКА (ДРОП ЗОНА И СУЩЕСТВА) -->
@@ -262,21 +275,19 @@
       <div id="myBoard" class="w-full h-full flex justify-center items-center gap-2"></div>
     </div>
 
-    <!-- НИЗ: ЦЕНТРАЛЬНЫЙ АВАТАР ИГРОКА (КРАСНАЯ ЗОНА 2) И КНОПКА ХОДА СПРАВА -->
+    <!-- НИЗ: ЦЕНТРАЛЬНЫЙ АВАТАР ИГРОКА И КНОПКА ХОДА СПРАВА -->
     <div class="relative w-full flex items-center justify-center py-1 z-10 px-4">
-      <!-- Герой по центру -->
       <div onclick="targetMyHero()" id="myHeroBox" class="flex flex-col items-center cursor-pointer active:scale-95 transition">
         <div class="relative">
-          <div class="w-14 h-14 rounded-full bg-emerald-950/80 border-2 border-emerald-500/90 flex items-center justify-center text-2xl shadow-lg shadow-emerald-950/50">🧙</div>
+          <div class="w-14 h-14 rounded-full bg-emerald-950/90 border-2 border-emerald-500 flex items-center justify-center text-2xl shadow-lg shadow-emerald-950/60">🧙</div>
           <span id="myHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-white font-black text-xs px-2 py-0.5 rounded-full border border-slate-900">25</span>
         </div>
-        <div class="flex items-center gap-1.5 mt-1 bg-slate-900/90 border border-slate-800 px-2.5 py-0.5 rounded-full">
+        <div class="flex items-center gap-1.5 mt-1 bg-slate-900/95 border border-slate-800 px-2.5 py-0.5 rounded-full">
           <span id="myBattleName" class="font-bold text-[11px] truncate max-w-[110px]">Вы</span>
           <span class="text-[10px] text-cyan-400 font-black">💎 <span id="myManaText">1/1</span></span>
         </div>
       </div>
 
-      <!-- Кнопка «Конец хода» справа от героя -->
       <div class="absolute right-3">
         <button id="endTurnBtn" onclick="endTurn()" class="px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-950/40 active:scale-95 transition">
           Конец<br>хода
@@ -284,11 +295,25 @@
       </div>
     </div>
 
-    <!-- СИНЯЯ ЗОНА: РУКА КАРТ ВЕЕРОМ/ДУГОЙ ВНИЗУ -->
-    <div class="w-full bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pt-1">
+    <!-- ВЕЕР НЕПРОЗРАЧНЫХ КАРТ В РУКЕ -->
+    <div class="w-full bg-gradient-to-t from-slate-950 via-slate-950 to-transparent pt-1">
       <div id="myHand" class="hand-container"></div>
     </div>
 
+  </div>
+
+  <!-- ДЕТАЛЬНОЕ ВСПЛЫВАЮЩЕЕ ОКНО ИСТОРИИ БОЯ -->
+  <div id="detailedLogModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 w-full max-w-sm flex flex-col max-h-[75vh]">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-3">
+        <div class="font-black text-sm text-amber-400 flex items-center gap-2">
+          <span>📜</span> Детальный журнал боя
+        </div>
+        <button onclick="toggleModal('detailedLogModal', false)" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+      <div id="detailedLogContent" class="flex-1 custom-scroll space-y-2 pr-1"></div>
+      <button onclick="toggleModal('detailedLogModal', false)" class="w-full py-2.5 bg-slate-800 rounded-xl font-bold text-xs text-white mt-3 active:scale-95 transition">Закрыть</button>
+    </div>
   </div>
 
   <!-- МОДАЛКА: СОЗДАНИЕ ДУЭЛИ -->
@@ -521,25 +546,41 @@
 
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
-    // --- ЖЕЛТАЯ ЗОНА: ВЕРТИКАЛЬНАЯ ПРАВАЯ ЛЕНТА ИСТОРИИ ---
+    // --- ИСТОРИЯ БОЯ СПРАВА И ДЕТАЛЬНЫЙ ПРОСМОТР ---
     function addCombatLog(entry) {
       combatLogs.unshift(entry);
-      if (combatLogs.length > 7) combatLogs.pop();
+      if (combatLogs.length > 25) combatLogs.pop();
 
+      // Обновляем боковую ленту (последние 7 действий)
       const rail = document.getElementById('combatLogRail');
-      rail.innerHTML = combatLogs.map(l => `
-        <div class="combat-log-bubble" title="${l.text}">
+      const latest = combatLogs.slice(0, 7);
+      rail.innerHTML = latest.map((l, idx) => `
+        <div onclick="openDetailedLog()" class="combat-log-bubble" title="${l.text}">
           ${l.icon || '⚔️'}
         </div>
       `).join('');
     }
 
-    // Анимации ударов
+    function openDetailedLog() {
+      haptic('light');
+      const content = document.getElementById('detailedLogContent');
+      content.innerHTML = combatLogs.map(l => `
+        <div class="p-2 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center gap-2">
+          <span class="text-lg">${l.icon || '⚔️'}</span>
+          <div class="text-[11px] text-slate-200">${l.text}</div>
+        </div>
+      `).join('');
+      toggleModal('detailedLogModal', true);
+    }
+
+    // --- АНИМАЦИИ ВЫПАДА, ПРИЗЫВА И УРОНА ---
     function triggerCardAttackAnimation(attackerUid, targetId) {
       const atkEl = document.getElementById(`minion_${attackerUid}`);
       const isOppAttacking = gameState?.me?.board?.some(m => m.uid === attackerUid) === false;
 
       if (atkEl) {
+        atkEl.classList.remove('attack-lunge-down', 'attack-lunge-up');
+        void atkEl.offsetWidth; // сброс reflow для перезапуска CSS
         atkEl.classList.add(isOppAttacking ? 'attack-lunge-down' : 'attack-lunge-up');
         setTimeout(() => {
           atkEl.classList.remove('attack-lunge-down', 'attack-lunge-up');
@@ -555,7 +596,7 @@
         setTimeout(() => {
           targetEl.classList.add('damage-shake');
           setTimeout(() => targetEl.classList.remove('damage-shake'), 380);
-        }, 150);
+        }, 160);
       }
     }
 
@@ -568,7 +609,7 @@
       float.className = `floating-text absolute top-0 text-sm font-black z-50 ${isHeal ? 'text-emerald-400' : 'text-red-500'}`;
       float.innerText = text;
       targetEl.appendChild(float);
-      setTimeout(() => float.remove(), 1100);
+      setTimeout(() => float.remove(), 1150);
       haptic(isHeal ? 'light' : 'medium');
     }
 
@@ -584,7 +625,6 @@
       document.getElementById('playScreen').classList.add('hidden');
       document.getElementById('battleArena').classList.remove('hidden');
 
-      // Обновляем центральные портреты
       document.getElementById('battleOppName').innerText = state.opp.name;
       document.getElementById('oppHpBadge').innerText = state.opp.hp;
       document.getElementById('oppManaText').innerText = `${state.opp.currentMana}/${state.opp.maxMana}`;
@@ -611,7 +651,7 @@
         const canAtk = isMine && gameState?.isMyTurn && m.canAttack && m.atk > 0;
         return `
           <div id="minion_${m.uid}" onclick="${isMine ? `selectBoardMinion('${m.uid}')` : `targetOppMinion('${m.uid}')`}" 
-               class="w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
+               class="spawn-pop w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
             <span class="text-xl text-center">${m.icon}</span>
             <span class="text-[9px] font-bold text-center truncate">${m.name}</span>
             <div class="flex justify-between text-[11px] font-black">
@@ -624,21 +664,20 @@
       }).join('');
     }
 
-    // --- СИНЯЯ ЗОНА: ВЕЕР КАРТ В РУКЕ ---
+    // --- НЕПРОЗРАЧНЫЙ ВЕЕР В РУКЕ ---
     function renderArcHand(hand) {
       const c = document.getElementById('myHand');
       const total = hand.length;
       if (total === 0) { c.innerHTML = ''; return; }
 
       const cardWidth = 62;
-      const spacing = total > 4 ? 36 : 48; // Нахлест при большом числе карт
+      const spacing = total > 4 ? 36 : 48;
       const startX = -((total - 1) * spacing) / 2;
 
       c.innerHTML = hand.map((card, idx) => {
         const canPlay = gameState?.isMyTurn && gameState.me.currentMana >= card.mana;
         const isSel = selectedHandCard?.uid === card.uid;
         
-        // Математика дуги: смещение по X, подъем по краям, поворот
         const posX = startX + idx * spacing;
         const normalizedIdx = total > 1 ? (idx - (total - 1) / 2) : 0;
         const rotateDeg = normalizedIdx * 4;
@@ -648,12 +687,12 @@
           <div id="handcard_${card.uid}"
                onclick="handleCardTap('${card.uid}')"
                style="left: calc(50% + ${posX}px - ${cardWidth/2}px); transform: translateY(${translateY}px) rotate(${rotateDeg}deg); z-index: ${idx + 10};"
-               class="hand-card-arc ${isSel ? 'selected' : ''} w-[62px] h-[92px] rounded-xl border ${canPlay ? 'border-emerald-500/80 bg-slate-900 shadow-md shadow-emerald-950/40' : 'border-slate-800 bg-slate-950 opacity-65'} p-1.5 flex flex-col justify-between cursor-pointer">
+               class="hand-card-arc ${isSel ? 'selected' : ''} w-[62px] h-[94px] rounded-xl border ${canPlay ? 'border-emerald-500 bg-slate-900 shadow-lg shadow-emerald-950/50' : 'border-slate-700 bg-slate-900 opacity-100'} p-1.5 flex flex-col justify-between cursor-pointer">
             <div class="flex justify-between items-center">
               <span class="w-4 h-4 rounded-full bg-cyan-600 text-white font-black text-[9px] flex items-center justify-center">${card.mana}</span>
               <span class="text-base">${card.icon}</span>
             </div>
-            <span class="text-[9px] font-bold text-center leading-tight truncate">${card.name}</span>
+            <span class="text-[9px] font-bold text-center leading-tight truncate text-slate-100">${card.name}</span>
             ${card.type === 'minion' ? `
               <div class="flex justify-between text-[10px] font-black">
                 <span class="${card.atk > 0 ? 'text-amber-400' : 'text-slate-500'}">${card.atk}</span>
@@ -681,7 +720,7 @@
       renderArcHand(gameState.me.hand);
     }
 
-    // Клик по столу для розыгрыша выбранной карты
+    // Тап по столу для розыгрыша с анимацией появления
     document.getElementById('myBoardDropZone').onclick = function() {
       if (!gameState?.isMyTurn || !selectedHandCard) return;
       if (selectedHandCard.type === 'minion') {
@@ -784,7 +823,7 @@
     }
 
     function surrenderMatch() {
-      if (confirm('Сдаться и покинуть матч?')) {
+      if (confirm('Сдаться и завершить матч?')) {
         handleGameOver({ winner: isBotMatch ? 'bot' : 'opp' });
       }
     }
@@ -807,7 +846,7 @@
       navigateTo('playScreen');
     }
 
-    // --- БОТ (ОБУЧЕНИЕ) ---
+    // --- БОТ-ОРКУЛ (ОБУЧЕНИЕ) ---
     function getCardData(id) {
       if (typeof CARDS_DATABASE !== 'undefined') {
         const c = CARDS_DATABASE.find(x => x.id === id);
@@ -857,7 +896,7 @@
 
       combatLogs = [];
       document.getElementById('combatLogRail').innerHTML = '';
-      addCombatLog({ text: 'Бой начался', icon: '⭐' });
+      addCombatLog({ text: 'Бой начался! Ваш ход.', icon: '⭐' });
       handleServerSync(gameState);
     }
 
@@ -882,7 +921,7 @@
       if (card.enemyDmg) gameState.opp.hp -= card.enemyDmg;
       if (card.draw && p.deck.length > 0 && p.hand.length < 6) p.hand.push(p.deck.pop());
 
-      addCombatLog({ text: `Призыв: ${card.name}`, icon: card.icon });
+      addCombatLog({ text: `Вы призвали: ${card.name} (${card.atk}/${card.hp})`, icon: card.icon });
       handleServerSync(gameState);
     }
 
@@ -908,7 +947,7 @@
       }
 
       b.board = b.board.filter(m => m.hp > 0);
-      addCombatLog({ text: `${card.name}`, icon: card.icon });
+      addCombatLog({ text: `Вы разыграли заклинание: ${card.name}`, icon: card.icon });
 
       if (b.hp <= 0) handleGameOver({ winner: 'player' });
       else handleServerSync(gameState);
@@ -925,7 +964,7 @@
         if (hasTaunt) return alert('Сначала уничтожьте Провокацию 🛡️');
         b.hp -= attacker.atk;
         attacker.canAttack = false;
-        addCombatLog({ text: `Удар в героя (-${attacker.atk})`, icon: '💥' });
+        addCombatLog({ text: `${attacker.name} бьет героя Бота (-${attacker.atk})`, icon: '💥' });
       } else {
         const defender = b.board.find(m => m.uid === targetId);
         if (!defender || (hasTaunt && !defender.taunt)) return alert('Атакуйте Провокацию 🛡️');
@@ -933,7 +972,7 @@
         defender.hp -= attacker.atk;
         attacker.hp -= defender.atk;
         attacker.canAttack = false;
-        addCombatLog({ text: `${attacker.name} ⚔️ ${defender.name}`, icon: '⚔️' });
+        addCombatLog({ text: `${attacker.name} ⚔️ ${defender.name} (-${attacker.atk}/-${defender.atk})`, icon: '⚔️' });
       }
 
       p.board = p.board.filter(m => m.hp > 0);
@@ -956,11 +995,11 @@
         b.hand = b.hiddenHand.length;
       }
 
-      addCombatLog({ text: 'Ход Бота', icon: '⏳' });
+      addCombatLog({ text: 'Ход Бота...', icon: '⏳' });
       handleServerSync(gameState);
 
       setTimeout(() => {
-        // Вызов существа
+        // Бот выставляет существо
         for (let i = b.hiddenHand.length - 1; i >= 0; i--) {
           const card = b.hiddenHand[i];
           if (b.board.length < 4 && b.currentMana >= card.mana && card.type === 'minion') {
@@ -977,13 +1016,13 @@
               taunt: !!card.taunt,
               canAttack: !!card.rush && card.atk > 0
             });
-            addCombatLog({ text: `Бот: ${card.name}`, icon: card.icon });
+            addCombatLog({ text: `Бот призвал: ${card.name} (${card.atk}/${card.hp})`, icon: card.icon });
             break;
           }
         }
         handleServerSync(gameState);
 
-        // Фаза атак бота
+        // Фаза атак бота с рывком и тряской
         setTimeout(() => {
           b.board.forEach(m => {
             if (!m.canAttack || m.atk <= 0) return;
@@ -993,17 +1032,17 @@
               triggerCardAttackAnimation(m.uid, pTaunt.uid);
               pTaunt.hp -= m.atk;
               m.hp -= pTaunt.atk;
-              addCombatLog({ text: `${m.name} ⚔️ ${pTaunt.name}`, icon: '⚔️' });
+              addCombatLog({ text: `${m.name} ⚔️ ${pTaunt.name} (-${m.atk}/-${pTaunt.atk})`, icon: '⚔️' });
             } else if (p.board.length > 0 && Math.random() > 0.4) {
               const targetMinion = p.board[0];
               triggerCardAttackAnimation(m.uid, targetMinion.uid);
               targetMinion.hp -= m.atk;
               m.hp -= targetMinion.atk;
-              addCombatLog({ text: `${m.name} ⚔️ ${targetMinion.name}`, icon: '⚔️' });
+              addCombatLog({ text: `${m.name} ⚔️ ${targetMinion.name} (-${m.atk}/-${targetMinion.atk})`, icon: '⚔️' });
             } else {
               triggerCardAttackAnimation(m.uid, 'my_hero');
               p.hp -= m.atk;
-              addCombatLog({ text: `Бот ударил героя (-${m.atk})`, icon: '💥' });
+              addCombatLog({ text: `Бот ударил героя (-${m.atk} HP)`, icon: '💥' });
             }
             m.canAttack = false;
           });
@@ -1025,10 +1064,10 @@
 
             gameState.turn = 1;
             gameState.isMyTurn = true;
-            addCombatLog({ text: 'Ваш ход', icon: '⭐' });
+            addCombatLog({ text: 'Ваш ход! Мана пополнена.', icon: '⭐' });
             handleServerSync(gameState);
           }, 600);
-        }, 800);
+        }, 850);
       }, 700);
     }
   </script>
