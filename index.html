@@ -19,7 +19,7 @@
     }
     .card-taunt {
       border-color: #f8fafc !important;
-      box-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.75);
     }
     .glow-green {
       box-shadow: 0 0 15px #22c55e;
@@ -30,37 +30,35 @@
       border-color: #eab308 !important;
     }
 
-    /* Анимация приземления карты на стол */
+    /* Анимации призыва и удара */
     .spawn-drop {
-      animation: spawnDropAnim 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+      animation: spawnDropAnim 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
     }
     @keyframes spawnDropAnim {
-      0% { transform: scale(1.3) translateY(-30px); opacity: 0; }
+      0% { transform: scale(0.3) translateY(-40px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
     }
 
-    /* Анимация удара существа на столе */
     .attack-lunge-up {
-      animation: lungeUpAnim 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+      animation: lungeUpAnim 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
       z-index: 50;
     }
     @keyframes lungeUpAnim {
       0% { transform: translateY(0) scale(1); }
-      45% { transform: translateY(-55px) scale(1.22); }
+      45% { transform: translateY(-60px) scale(1.25); }
       100% { transform: translateY(0) scale(1); }
     }
 
     .attack-lunge-down {
-      animation: lungeDownAnim 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+      animation: lungeDownAnim 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
       z-index: 50;
     }
     @keyframes lungeDownAnim {
       0% { transform: translateY(0) scale(1); }
-      45% { transform: translateY(55px) scale(1.22); }
+      45% { transform: translateY(60px) scale(1.25); }
       100% { transform: translateY(0) scale(1); }
     }
 
-    /* Тряска цели при ударе */
     .damage-shake {
       animation: shakeAnim 0.38s cubic-bezier(.36,.07,.19,.97) both;
     }
@@ -71,9 +69,8 @@
       40%, 60% { transform: translate3d(5px, 0, 0); }
     }
 
-    /* Всплывающий урон */
     .floating-text {
-      animation: floatUpAnim 1.2s ease-out forwards;
+      animation: floatUpAnim 1.1s ease-out forwards;
       pointer-events: none;
     }
     @keyframes floatUpAnim {
@@ -81,11 +78,11 @@
       100% { opacity: 0; transform: translateY(-40px) scale(1.4); }
     }
 
-    /* ЗОНА РУКИ: КАРТЫ УВЕЛИЧЕНЫ И ДОХОДЯТ ПОЧТИ ДО НИКА */
+    /* РУКА: БОЛЬШИЕ КАРТЫ */
     .hand-container {
       position: relative;
       width: 100%;
-      height: 155px; /* Увеличенная высота */
+      height: 175px;
       display: flex;
       justify-content: center;
       align-items: flex-end;
@@ -93,43 +90,40 @@
     }
     .hand-card-arc {
       position: absolute;
-      transition: transform 0.22s ease-out, box-shadow 0.22s ease-out;
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease-out;
       transform-origin: bottom center;
-      background-color: #0f172a !important; /* Полностью непрозрачный */
+      background-color: #0f172a !important;
       opacity: 1 !important;
-      box-shadow: -4px 6px 14px rgba(0, 0, 0, 0.8);
+      box-shadow: -5px 8px 18px rgba(0, 0, 0, 0.85);
       touch-action: none;
     }
     .hand-card-arc.selected {
-      transform: translateY(-52px) scale(1.22) rotate(0deg) !important;
-      z-index: 60 !important;
-      box-shadow: 0 0 20px #f59e0b !important;
+      transform: translateY(-64px) scale(1.22) rotate(0deg) !important;
+      z-index: 70 !important;
+      box-shadow: 0 0 24px #f59e0b !important;
       border-color: #f59e0b !important;
     }
 
-    /* Полет карты за пальцем */
     .card-dragging {
       position: fixed !important;
       pointer-events: none !important;
       z-index: 100 !important;
       transform: scale(1.25) !important;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 20px #38bdf8 !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 22px #38bdf8 !important;
       transition: none !important;
     }
 
-    /* Подсветка стола при перетаскивании */
     .board-drop-active {
       border-color: #38bdf8 !important;
-      background: rgba(56, 189, 248, 0.15) !important;
-      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.16) !important;
     }
 
-    /* Правая вертикальная лента истории */
+    /* Лента истории */
     .combat-log-rail {
       position: absolute;
       right: 6px;
-      top: 55px;
-      bottom: 165px;
+      top: 65px;
+      bottom: 180px;
       width: 44px;
       display: flex;
       flex-direction: column;
@@ -150,17 +144,37 @@
       font-size: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.7);
       cursor: pointer;
-      transition: transform 0.15s, border-color 0.15s;
     }
-    .combat-log-bubble:active {
-      transform: scale(0.9);
-      border-color: #f59e0b;
+
+    /* Холст стрелки прицеливания (Hearthstone Target Arrow) */
+    #targetingCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 90;
     }
   </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex flex-col font-sans">
 
-  <!-- ШАПКА -->
+  <!-- SVG Стрелка таргетинга -->
+  <svg id="targetingCanvas" class="hidden">
+    <defs>
+      <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#ef4444" />
+      </marker>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <path id="arrowPath" d="" stroke="#ef4444" stroke-width="6" stroke-dasharray="8 6" fill="none" marker-end="url(#arrowHead)" filter="url(#glow)"/>
+  </svg>
+
+  <!-- ШАПКА МЕНЮ -->
   <header id="appHeader" class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center sticky top-0 z-20">
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center font-bold text-xs">⚔️</div>
@@ -171,7 +185,7 @@
         <span class="text-amber-400 font-extrabold text-sm mr-1" id="balanceText">200</span>
         <span class="text-xs">🪙</span>
       </div>
-      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg hover:bg-amber-500/40">➕</button>
+      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg">➕</button>
     </div>
   </header>
 
@@ -266,7 +280,7 @@
   <!-- ЭКРАН 4: СТОЛ МАТЧА ПО СХЕМЕ -->
   <div id="battleArena" class="hidden fixed inset-0 bg-slate-950 z-30 flex flex-col justify-between overflow-hidden">
     
-    <!-- ВЕРХ: ЦЕНТРАЛЬНЫЙ АВАТАР ОППОНЕНТА -->
+    <!-- ВЕРХ: ОППОНЕНТ И ТАЙМЕР 60 СЕК СПРАВА -->
     <div class="relative w-full pt-3 pb-1 flex flex-col items-center justify-center z-10">
       <div onclick="targetOppHero()" id="oppHeroBox" class="flex flex-col items-center cursor-pointer active:scale-95 transition">
         <div class="relative">
@@ -279,9 +293,16 @@
         </div>
       </div>
 
+      <!-- Кнопка сдачи слева -->
       <button onclick="surrenderMatch()" class="absolute left-3 top-3 text-[11px] text-slate-500 hover:text-red-400 bg-slate-900/70 px-2.5 py-1 rounded-lg border border-slate-800">
         Сдаться
       </button>
+
+      <!-- ТАЙМЕР 1 МИНУТА СПРАВА ВВЕРХУ -->
+      <div class="absolute right-3 top-3 flex items-center gap-1 bg-slate-900/80 border border-slate-700 px-2.5 py-1 rounded-full text-xs font-black shadow-md">
+        <span>⏱️</span>
+        <span id="turnTimerText" class="text-amber-400 font-mono">60s</span>
+      </div>
     </div>
 
     <!-- ПРАВАЯ ВЕРТИКАЛЬНАЯ ЛЕНТА ИСТОРИИ -->
@@ -291,7 +312,7 @@
     <div id="oppBoard" class="h-24 flex justify-center items-center gap-2 px-10 my-1"></div>
 
     <!-- ЗОНА СТОЛА ИГРОКА (ДРОП ЗОНА И СУЩЕСТВА) -->
-    <div id="myBoardDropZone" class="h-24 flex justify-center items-center gap-2 px-10 border border-dashed border-slate-800/80 rounded-2xl mx-3 transition-colors">
+    <div id="myBoardDropZone" class="h-24 flex justify-center items-center gap-2 px-10 border border-dashed border-slate-800/80 rounded-2xl mx-3 transition-colors cursor-pointer">
       <div id="myBoard" class="w-full h-full flex justify-center items-center gap-2"></div>
     </div>
 
@@ -361,9 +382,9 @@
       <p>Цель: снизить здоровье героя соперника до 0 HP.</p>
       <div class="border-t border-slate-800 pt-2 space-y-1.5">
         <p>💎 <b>Мана:</b> растет от 1 до 8 кристаллов каждый ход.</p>
-        <p>🖐️ <b>Розыгрыш:</b> нажмите на карту в руке ➔ она выдвинется, после чего потяните её на стол!</p>
-        <p>⚔️ <b>Атака:</b> выберите существо на столе (зеленое свечение) ➔ затем цель.</p>
-        <p>🛡️ <b>Провокация:</b> существа со щитом защищают героя, пока не погибнут.</p>
+        <p>🖐️ <b>Розыгрыш:</b> нажмите на карту ➔ она выдвинется. Нажмите еще раз для отмены, либо потяните/нажмите на стол для розыгрыша!</p>
+        <p>🎯 <b>Стрелка таргетинга:</b> при атаке или заклинании тяните стрелку прямо в цель.</p>
+        <p>⏱️ <b>Таймер:</b> 60 секунд на ход, затем ход сменяется автоматически.</p>
       </div>
       <button onclick="toggleModal('rulesModal', false)" class="w-full py-2.5 bg-slate-800 rounded-xl font-bold text-white mt-2">Понятно</button>
     </div>
@@ -387,6 +408,10 @@
     let currentBet = 50;
     let isBotMatch = false;
 
+    // Таймер хода на 60 сек
+    let turnTimeLeft = 60;
+    let turnInterval = null;
+
     const defaultDeck = ['c1_1', 'c1_2', 'c1_3', 'c1_4', 'c2_1', 'c2_2', 'c2_4', 'c3_1', 'c3_2', 'c3_4', 'c4_1', 'c4_3', 'c5_1', 'c6_1', 'c8_1'];
     let myDeck = JSON.parse(localStorage.getItem('cards_my_deck')) || defaultDeck;
 
@@ -394,6 +419,10 @@
     let selectedHandCard = null;
     let selectedBoardMinion = null;
     let combatLogs = [];
+
+    // Таргетинг стрелкой
+    let isTargeting = false;
+    let targetSourcePos = { x: 0, y: 0 };
 
     document.getElementById('userName').innerText = playerName;
     updateBalanceDisplay();
@@ -421,7 +450,7 @@
       socket.on('game_over', (res) => handleGameOver(res));
       socket.on('connect_error', () => {
         const rl = document.getElementById('roomList');
-        if (rl) rl.innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер оффлайн. Доступен режим «Обучение» с ботом.</div>`;
+        if (rl) rl.innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер оффлайн. Доступно Обучение с ботом.</div>`;
       });
     } catch(e) { console.warn("Socket offline"); }
 
@@ -434,6 +463,78 @@
 
     function addCoins() { balance += 100; updateBalanceDisplay(); haptic('medium'); }
     function toggleModal(id, show) { document.getElementById(id).classList.toggle('hidden', !show); }
+
+    // --- ТАЙМЕР 60 СЕКУНД ---
+    function startTurnTimer() {
+      if (turnInterval) clearInterval(turnInterval);
+      turnTimeLeft = 60;
+      updateTimerDisplay();
+
+      turnInterval = setInterval(() => {
+        turnTimeLeft--;
+        updateTimerDisplay();
+        if (turnTimeLeft <= 0) {
+          clearInterval(turnInterval);
+          // Автосмена хода
+          if (gameState?.isMyTurn) {
+            endTurn();
+          }
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const el = document.getElementById('turnTimerText');
+      if (el) {
+        el.innerText = `${turnTimeLeft}s`;
+        if (turnTimeLeft <= 10) el.className = "text-red-500 font-mono animate-pulse";
+        else el.className = "text-amber-400 font-mono";
+      }
+    }
+
+    // --- СТРЕЛКА ТАРГЕТИНГА (HEARTHSTONE) ---
+    function startArrowTargeting(sourceEl) {
+      const rect = sourceEl.getBoundingClientRect();
+      targetSourcePos = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+      isTargeting = true;
+      document.getElementById('targetingCanvas').classList.remove('hidden');
+    }
+
+    function updateArrowPath(curX, curY) {
+      if (!isTargeting) return;
+      const sx = targetSourcePos.x;
+      const sy = targetSourcePos.y;
+      const dx = curX - sx;
+      const dy = curY - sy;
+
+      // Кривая Безье для дугообразной стрелки
+      const cx = sx + dx * 0.2;
+      const cy = sy + dy * 0.8;
+
+      const path = `M ${sx} ${sy} Q ${cx} ${cy} ${curX} ${curY}`;
+      document.getElementById('arrowPath').setAttribute('d', path);
+    }
+
+    function stopArrowTargeting() {
+      isTargeting = false;
+      document.getElementById('targetingCanvas').classList.add('hidden');
+      document.getElementById('arrowPath').setAttribute('d', '');
+    }
+
+    window.addEventListener('touchmove', (e) => {
+      if (isTargeting) {
+        updateArrowPath(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      if (isTargeting) {
+        stopArrowTargeting();
+      }
+    });
 
     // --- ДЕКБИЛДЕР ---
     function updateDeckBadges() {
@@ -566,7 +667,7 @@
 
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
-    // --- ПРАВАЯ ЛЕНТА ИСТОРИИ И ДЕТАЛЬНЫЙ ПРОСМОТР ---
+    // --- ПРАВАЯ ЛЕНТА ИСТОРИИ ---
     function addCombatLog(entry) {
       combatLogs.unshift(entry);
       if (combatLogs.length > 25) combatLogs.pop();
@@ -603,7 +704,7 @@
         atkEl.classList.add(isOppAttacking ? 'attack-lunge-down' : 'attack-lunge-up');
         setTimeout(() => {
           atkEl.classList.remove('attack-lunge-down', 'attack-lunge-up');
-        }, 380);
+        }, 360);
       }
 
       let targetEl = null;
@@ -628,7 +729,7 @@
       float.className = `floating-text absolute top-0 text-sm font-black z-50 ${isHeal ? 'text-emerald-400' : 'text-red-500'}`;
       float.innerText = text;
       targetEl.appendChild(float);
-      setTimeout(() => float.remove(), 1180);
+      setTimeout(() => float.remove(), 1100);
       haptic(isHeal ? 'light' : 'medium');
     }
 
@@ -661,6 +762,9 @@
       renderBoard(state.opp.board, 'oppBoard', false);
       renderBoard(state.me.board, 'myBoard', true);
       renderArcHand(state.me.hand);
+
+      // Перезапуск таймера на каждый ход
+      startTurnTimer();
     }
 
     function renderBoard(minions, containerId, isMine) {
@@ -683,7 +787,7 @@
       }).join('');
     }
 
-    // --- УВЕЛИЧЕННЫЙ ВЕЕР КАРТ В РУКЕ И ДРАГ-ЭНД-ДРОП ---
+    // --- КРУПНЫЙ ВЕЕР КАРТ: 96x142px С ПОВТОРНЫМ КЛИКОМ ДЛЯ ОТМЕНЫ ---
     let dragCardObj = null;
     let dragElement = null;
     let startTouchY = 0;
@@ -693,9 +797,8 @@
       const total = hand.length;
       if (total === 0) { c.innerHTML = ''; return; }
 
-      // Увеличенная ширина и нахлест
-      const cardWidth = 86;
-      const spacing = total > 4 ? 44 : 56;
+      const cardWidth = 96;
+      const spacing = total > 4 ? 48 : 62;
       const startX = -((total - 1) * spacing) / 2;
 
       c.innerHTML = hand.map((card, idx) => {
@@ -704,25 +807,25 @@
         
         const posX = startX + idx * spacing;
         const normalizedIdx = total > 1 ? (idx - (total - 1) / 2) : 0;
-        const rotateDeg = normalizedIdx * 3.5;
-        const translateY = Math.abs(normalizedIdx) * 4;
+        const rotateDeg = normalizedIdx * 3.2;
+        const translateY = Math.abs(normalizedIdx) * 5;
 
         return `
           <div id="handcard_${card.uid}"
                data-uid="${card.uid}"
                style="left: calc(50% + ${posX}px - ${cardWidth/2}px); transform: translateY(${translateY}px) rotate(${rotateDeg}deg); z-index: ${idx + 10};"
-               class="hand-card-arc ${isSel ? 'selected' : ''} w-[86px] h-[128px] rounded-2xl border-2 ${canPlay ? 'border-emerald-500/90 bg-slate-900 shadow-xl shadow-emerald-950/40' : 'border-slate-700 bg-slate-900'} p-2 flex flex-col justify-between cursor-pointer">
+               class="hand-card-arc ${isSel ? 'selected' : ''} w-[96px] h-[142px] rounded-2xl border-2 ${canPlay ? 'border-emerald-500/90 bg-slate-900 shadow-2xl' : 'border-slate-700 bg-slate-900'} p-2.5 flex flex-col justify-between cursor-pointer">
             <div class="flex justify-between items-center">
-              <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-black text-xs flex items-center justify-center">${card.mana}</span>
+              <span class="w-7 h-7 rounded-full bg-cyan-600 text-white font-black text-xs flex items-center justify-center">${card.mana}</span>
               <span class="text-2xl">${card.icon}</span>
             </div>
-            <div class="text-[11px] font-bold text-center leading-tight truncate text-slate-100">${card.name}</div>
+            <div class="text-xs font-black text-center leading-tight truncate text-slate-100">${card.name}</div>
             ${card.type === 'minion' ? `
               <div class="flex justify-between text-xs font-black pt-1">
                 <span class="${card.atk > 0 ? 'text-amber-400' : 'text-slate-500'}">⚔️${card.atk}</span>
                 <span class="text-red-400">❤️${card.hp}</span>
               </div>` : `
-              <div class="text-[10px] text-center font-bold text-indigo-400">Заклинание</div>`
+              <div class="text-[11px] text-center font-bold text-indigo-400">Заклинание</div>`
             }
           </div>
         `;
@@ -750,8 +853,12 @@
       dragElement = this;
       startTouchY = e.touches[0].clientY;
 
-      // Если карта еще не была выдвинута вверх — выдвигаем её
-      if (selectedHandCard?.uid !== uid) {
+      // КЛИК С ОТМЕНОЙ: если уже выдвинута — опускаем обратно
+      if (selectedHandCard?.uid === uid) {
+        selectedHandCard = null;
+        haptic('light');
+        renderArcHand(gameState.me.hand);
+      } else {
         selectedHandCard = card;
         selectedBoardMinion = null;
         haptic('light');
@@ -764,13 +871,16 @@
       const touch = e.touches[0];
       const deltaY = startTouchY - touch.clientY;
 
-      // Если потянули вверх больше чем на 18px — включаем режим перетаскивания на стол
-      if (deltaY > 18) {
+      // Достаточно потянуть вверх на 14px, чтобы начать перенос
+      if (deltaY > 14) {
         e.preventDefault();
         dragElement.classList.add('card-dragging');
-        dragElement.style.left = `${touch.clientX - 43}px`;
-        dragElement.style.top = `${touch.clientY - 64}px`;
+        dragElement.style.left = `${touch.clientX - 48}px`;
+        dragElement.style.top = `${touch.clientY - 71}px`;
         document.getElementById('myBoardDropZone').classList.add('board-drop-active');
+
+        // Рисуем стрелку при перетаскивании
+        updateArrowPath(touch.clientX, touch.clientY);
       }
     }
 
@@ -779,15 +889,17 @@
 
       const dropZone = document.getElementById('myBoardDropZone').getBoundingClientRect();
       const cardRect = dragElement.getBoundingClientRect();
-      const droppedOnBoard = cardRect.top < dropZone.bottom && cardRect.bottom > dropZone.top;
+
+      // Увеличенная зона попадания на стол
+      const droppedOnBoard = cardRect.top < (dropZone.bottom + 40) && (cardRect.bottom - 40) > (dropZone.top - 60);
 
       dragElement.classList.remove('card-dragging');
       document.getElementById('myBoardDropZone').classList.remove('board-drop-active');
+      stopArrowTargeting();
 
       if (droppedOnBoard && dragCardObj.type === 'minion') {
         playSelectedMinion(dragCardObj);
       } else {
-        // Если просто тапнули без перетаскивания на поле — оставляем выдвинутой
         renderArcHand(gameState.me.hand);
       }
 
@@ -795,7 +907,7 @@
       dragElement = null;
     }
 
-    // Тап по столу для розыгрыша выдвинутой карты
+    // Тап по зоне стола для розыгрыша
     document.getElementById('myBoardDropZone').onclick = function() {
       if (!gameState?.isMyTurn || !selectedHandCard) return;
       if (selectedHandCard.type === 'minion') {
@@ -813,19 +925,29 @@
       selectedHandCard = null;
     }
 
+    // Выбор существа на столе и запуск стрелки
     function selectBoardMinion(uid) {
       if (!gameState?.isMyTurn) return;
       const m = gameState.me.board.find(x => x.uid === uid);
       if (m && m.canAttack && m.atk > 0) {
         haptic('light');
-        selectedBoardMinion = uid;
-        selectedHandCard = null;
+        if (selectedBoardMinion === uid) {
+          selectedBoardMinion = null;
+          stopArrowTargeting();
+        } else {
+          selectedBoardMinion = uid;
+          selectedHandCard = null;
+          const minionEl = document.getElementById(`minion_${uid}`);
+          if (minionEl) startArrowTargeting(minionEl);
+        }
         renderBoard(gameState.me.board, 'myBoard', true);
       }
     }
 
     function targetOppHero() {
       if (!gameState?.isMyTurn) return;
+      stopArrowTargeting();
+
       if (selectedBoardMinion) {
         haptic('heavy');
         triggerCardAttackAnimation(selectedBoardMinion, 'opp_hero');
@@ -848,6 +970,8 @@
 
     function targetOppMinion(uid) {
       if (!gameState?.isMyTurn) return;
+      stopArrowTargeting();
+
       if (selectedBoardMinion) {
         haptic('heavy');
         triggerCardAttackAnimation(selectedBoardMinion, uid);
@@ -871,6 +995,7 @@
     function targetMyHero() {
       if (selectedHandCard && selectedHandCard.type === 'spell' && selectedHandCard.heal) {
         haptic('light');
+        stopArrowTargeting();
         if (isBotMatch) {
           playBotMatchSpell(selectedHandCard, 'my_hero');
         } else if (socket) {
@@ -883,6 +1008,7 @@
     function endTurn() {
       if (!gameState || !gameState.isMyTurn) return;
       haptic('medium');
+      stopArrowTargeting();
       selectedHandCard = null;
       selectedBoardMinion = null;
 
@@ -899,11 +1025,14 @@
 
     function surrenderMatch() {
       if (confirm('Сдаться и завершить матч?')) {
+        if (turnInterval) clearInterval(turnInterval);
         handleGameOver({ winner: isBotMatch ? 'bot' : 'opp' });
       }
     }
 
     function handleGameOver(res) {
+      if (turnInterval) clearInterval(turnInterval);
+      stopArrowTargeting();
       const isWin = res.winner === (isBotMatch ? 'player' : socket?.id);
       const prize = Math.floor(currentBet * 2 * 0.9);
       if (isWin) {
@@ -1022,7 +1151,7 @@
       }
 
       b.board = b.board.filter(m => m.hp > 0);
-      addCombatLog({ text: `Вы разыграли заклинание: ${card.name}`, icon: card.icon });
+      addCombatLog({ text: `Вы сыграли: ${card.name}`, icon: card.icon });
 
       if (b.hp <= 0) handleGameOver({ winner: 'player' });
       else handleServerSync(gameState);
@@ -1036,13 +1165,13 @@
 
       const hasTaunt = b.board.some(m => m.taunt);
       if (targetId === 'opp_hero') {
-        if (hasTaunt) return alert('Сначала уничтожьте Провокацию 🛡️');
+        if (hasTaunt) return alert('Сначала уничтожьте существо с Провокацией 🛡️');
         b.hp -= attacker.atk;
         attacker.canAttack = false;
         addCombatLog({ text: `${attacker.name} бьет героя Бота (-${attacker.atk})`, icon: '💥' });
       } else {
         const defender = b.board.find(m => m.uid === targetId);
-        if (!defender || (hasTaunt && !defender.taunt)) return alert('Атакуйте Провокацию 🛡️');
+        if (!defender || (hasTaunt && !defender.taunt)) return alert('Атакуйте существо с Провокацией 🛡️');
 
         defender.hp -= attacker.atk;
         attacker.hp -= defender.atk;
@@ -1074,7 +1203,7 @@
       handleServerSync(gameState);
 
       setTimeout(() => {
-        // Бот выставляет существо
+        // Вызов существа ботом
         for (let i = b.hiddenHand.length - 1; i >= 0; i--) {
           const card = b.hiddenHand[i];
           if (b.board.length < 4 && b.currentMana >= card.mana && card.type === 'minion') {
@@ -1097,7 +1226,7 @@
         }
         handleServerSync(gameState);
 
-        // Фаза атак бота
+        // Атаки бота
         setTimeout(() => {
           b.board.forEach(m => {
             if (!m.canAttack || m.atk <= 0) return;
@@ -1130,7 +1259,7 @@
             return;
           }
 
-          // Возврат хода игроку
+          // Передача хода игроку
           setTimeout(() => {
             if (p.maxMana < 8) p.maxMana++;
             p.currentMana = p.maxMana;
