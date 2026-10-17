@@ -19,41 +19,71 @@
     }
     .card-taunt {
       border-color: #cbd5e1 !important;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.55);
     }
-    .glow-green { box-shadow: 0 0 12px #22c55e; }
-    .glow-yellow { box-shadow: 0 0 14px #eab308; }
+    .glow-green {
+      box-shadow: 0 0 12px #22c55e;
+      border-color: #22c55e !important;
+    }
+    .glow-yellow {
+      box-shadow: 0 0 14px #eab308;
+      border-color: #eab308 !important;
+    }
 
-    /* Анимации */
-    .damage-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    /* Анимация физического выпада карты при атаке */
+    .attack-lunge-up {
+      animation: lungeUp 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 50;
+    }
+    @keyframes lungeUp {
+      0% { transform: translateY(0) scale(1); }
+      40% { transform: translateY(-38px) scale(1.15); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .attack-lunge-down {
+      animation: lungeDown 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 50;
+    }
+    @keyframes lungeDown {
+      0% { transform: translateY(0) scale(1); }
+      40% { transform: translateY(38px) scale(1.15); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    /* Тряска цели при получении урона */
+    .damage-shake {
+      animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+    }
     @keyframes shake {
-      10%, 90% { transform: translate3d(-1px, 0, 0); }
-      20%, 80% { transform: translate3d(2px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-      40%, 60% { transform: translate3d(3px, 0, 0); }
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(3px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
+    /* Всплывающие цифры урона/лечения */
     .floating-text {
-      animation: floatUp 1.2s ease-out forwards;
+      animation: floatUp 1.1s ease-out forwards;
       pointer-events: none;
     }
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-35px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-32px) scale(1.3); }
     }
 
+    /* Drag & Drop */
     .card-dragged {
       position: fixed !important;
       pointer-events: none !important;
       z-index: 100 !important;
       transform: scale(1.15) !important;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 15px #38bdf8 !important;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.8), 0 0 15px #38bdf8 !important;
       transition: none !important;
     }
-
     .drop-active {
       border-color: #38bdf8 !important;
-      background: rgba(56, 189, 248, 0.1) !important;
+      background: rgba(56, 189, 248, 0.12) !important;
     }
   </style>
 </head>
@@ -70,7 +100,7 @@
         <span class="text-amber-400 font-extrabold text-sm mr-1" id="balanceText">200</span>
         <span class="text-xs">🪙</span>
       </div>
-      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg">➕</button>
+      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg hover:bg-amber-500/40">➕</button>
     </div>
   </header>
 
@@ -94,7 +124,7 @@
     </button>
   </main>
 
-  <!-- ЭКРАН 2: РЕЖИМЫ ИГРЫ -->
+  <!-- ЭКРАН 2: ВЫБОР РЕЖИМА -->
   <div id="playScreen" class="hidden flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
     <div class="flex items-center justify-between">
       <button onclick="navigateTo('mainMenuScreen')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-bold">
@@ -164,7 +194,7 @@
 
   <!-- ЭКРАН 4: СТОЛ МАТЧА С БОКОВЫМ ЛОГОМ И АНИМАЦИЯМИ -->
   <div id="battleArena" class="hidden fixed inset-0 bg-slate-950 z-30 flex flex-col justify-between p-2">
-    <!-- Верх: Оппонент + Кнопка истории боя -->
+    <!-- Оппонент + Кнопка истории боя -->
     <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-2xl border border-slate-800">
       <div onclick="targetOppHero()" id="oppHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl transition">
         <div class="relative">
@@ -190,12 +220,12 @@
     <!-- Стол оппонента (4 слота) -->
     <div id="oppBoard" class="h-24 flex justify-center items-center gap-2 border-b border-dashed border-slate-800/80 my-1"></div>
 
-    <!-- Зона розыгрыша стола игрока (Drop Zone для Drag-and-drop) -->
+    <!-- Стол игрока (Drop Zone) -->
     <div id="myBoardDropZone" class="h-24 flex justify-center items-center gap-2 border border-dashed border-slate-800/80 rounded-xl my-1 transition-all">
       <div id="myBoard" class="w-full h-full flex justify-center items-center gap-2"></div>
     </div>
 
-    <!-- Панель игрока: Мана, Герой, Кнопка хода -->
+    <!-- Панель игрока -->
     <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-2xl border border-slate-800">
       <div onclick="targetMyHero()" id="myHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl transition">
         <div class="relative">
@@ -215,7 +245,7 @@
       </button>
     </div>
 
-    <!-- Рука игрока с поддержкой Touch Drag -->
+    <!-- Рука игрока -->
     <div id="myHand" class="h-28 flex items-center gap-1.5 overflow-x-auto py-1 px-1 bg-slate-900/50 rounded-2xl border border-slate-800/60 custom-scroll relative"></div>
   </div>
 
@@ -254,8 +284,8 @@
       <div class="border-t border-slate-800 pt-2 space-y-1.5">
         <p>💎 <b>Мана:</b> растет от 1 до 8 кристаллов каждый ход.</p>
         <p>🖐️ <b>Розыгрыш:</b> поднимите карту пальцем и перетащите на стол!</p>
-        <p>🛡️ <b>Провокация:</b> защищает героя, пока не будет уничтожена.</p>
-        <p>⚡ <b>Рывок:</b> атакует вражеских миньонов в ход призыва.</p>
+        <p>⚔️ <b>Атака:</b> нажмите на свое существо (зеленое свечение) ➔ затем на врага или героя.</p>
+        <p>🛡️ <b>Провокация:</b> существа со щитом 0/4 не атакуют сами, но обязаны быть атакованы первыми.</p>
       </div>
       <button onclick="toggleModal('rulesModal', false)" class="w-full py-2.5 bg-slate-800 rounded-xl font-bold text-white mt-2">Понятно</button>
     </div>
@@ -263,7 +293,7 @@
 
   <script src="cardsData.js"></script>
   <script>
-    // ВСТАВЬ СЮДА СВОЮ ССЫЛКУ С RENDER (без / в конце):
+    // Точный адрес сервера
     const SERVER_URL = "https://cards-server-b289.onrender.com";
 
     let tg = window.Telegram?.WebApp;
@@ -278,6 +308,7 @@
     let playerName = tg?.initDataUnsafe?.user?.first_name || localStorage.getItem('cards_name') || 'Игрок 1';
     let currentRoomId = null;
     let currentBet = 50;
+    let isBotMatch = false;
 
     const defaultDeck = ['c1_1', 'c1_2', 'c1_3', 'c1_4', 'c2_1', 'c2_2', 'c2_4', 'c3_1', 'c3_2', 'c3_4', 'c4_1', 'c4_3', 'c5_1', 'c6_1', 'c8_1'];
     let myDeck = JSON.parse(localStorage.getItem('cards_my_deck')) || defaultDeck;
@@ -306,12 +337,14 @@
       socket.on('connect', () => socket.emit('get_lobby'));
       socket.on('lobby_update', renderRoomList);
       socket.on('room_created', ({ roomId }) => { currentRoomId = roomId; renderWaitingState(); });
+      socket.on('room_error', (msg) => alert(msg));
       socket.on('sync_state', (state) => handleServerSync(state));
       socket.on('combat_log', (entry) => addCombatLog(entry));
+      socket.on('card_attack_anim', ({ attackerUid, targetId }) => triggerCardAttackAnimation(attackerUid, targetId));
       socket.on('game_over', (res) => handleGameOver(res));
       socket.on('connect_error', () => {
         const rl = document.getElementById('roomList');
-        if (rl) rl.innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер оффлайн. Доступно Обучение с ботом.</div>`;
+        if (rl) rl.innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер оффлайн. Доступен режим «Обучение» с ботом.</div>`;
       });
     } catch(e) { console.warn("Socket offline"); }
 
@@ -387,7 +420,7 @@
       navigateTo('mainMenuScreen');
     }
 
-    // --- ЛОББИ ---
+    // --- ЛОББИ ДУЭЛЕЙ ---
     function updateBet(v) { currentBet = Number(v); document.getElementById('betDisplay').innerText = v; }
     function openCreateRoomModal() {
       if (myDeck.length !== 15) return alert('Соберите 15 карт во вкладке "Моя колода"!');
@@ -410,12 +443,22 @@
         c.innerHTML = `<div class="text-center py-8 bg-slate-900/40 border border-slate-800 rounded-2xl text-xs text-slate-400">Нет активных дуэлей. Создай первую!</div>`;
         return;
       }
-      c.innerHTML = rooms.map(r => `
-        <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center justify-between">
-          <div><div class="font-bold text-xs">${r.hostName}</div><div class="text-[11px] text-amber-400">Ставка: ${r.bet} 🪙</div></div>
-          <button onclick="joinRoom('${r.id}', ${r.bet})" class="px-3 py-1.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-xl">В бой</button>
-        </div>
-      `).join('');
+      c.innerHTML = rooms.map(r => {
+        const isMyRoom = socket?.id && r.hostId === socket.id;
+        return `
+          <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center justify-between">
+            <div>
+              <div class="font-bold text-xs">${r.hostName} ${isMyRoom ? '<span class="text-amber-400">(Ваша)</span>' : ''}</div>
+              <div class="text-[11px] text-amber-400">Ставка: ${r.bet} 🪙</div>
+            </div>
+            ${isMyRoom ? `
+              <span class="text-xs text-slate-500 font-bold px-2 py-1">Ожидание...</span>
+            ` : `
+              <button onclick="joinRoom('${r.id}',${r.bet})" class="px-3 py-1.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-xl active:scale-95">В бой</button>
+            `}
+          </div>
+        `;
+      }).join('');
     }
 
     function joinRoom(roomId, bet) {
@@ -423,6 +466,7 @@
       if (balance < bet) return alert('Недостаточно монет!');
       currentRoomId = roomId;
       currentBet = bet;
+      isBotMatch = false;
       if (socket?.connected) socket.emit('join_room', { roomId, guestName: playerName, deck: myDeck });
     }
 
@@ -445,7 +489,7 @@
 
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
-    // --- БОЕВОЙ СТОЛ И ИСТОРИЯ ---
+    // --- БОЕВОЙ СТОЛ, АНИМАЦИИ И ЛОГ ---
     function addCombatLog(entry) {
       combatLogs.unshift(entry);
       if (combatLogs.length > 20) combatLogs.pop();
@@ -464,6 +508,32 @@
       document.getElementById('combatLogDrawer').classList.toggle('hidden');
     }
 
+    // Анимация выпада карты при атаке
+    function triggerCardAttackAnimation(attackerUid, targetId) {
+      const atkEl = document.getElementById(`minion_${attackerUid}`);
+      const isOppAttacking = gameState?.me?.board?.some(m => m.uid === attackerUid) === false;
+
+      if (atkEl) {
+        atkEl.classList.add(isOppAttacking ? 'attack-lunge-down' : 'attack-lunge-up');
+        setTimeout(() => {
+          atkEl.classList.remove('attack-lunge-down', 'attack-lunge-up');
+        }, 360);
+      }
+
+      // Тряска цели
+      let targetEl = null;
+      if (targetId === 'opp_hero') targetEl = document.getElementById('oppHeroBox');
+      else if (targetId === 'my_hero') targetEl = document.getElementById('myHeroBox');
+      else targetEl = document.getElementById(`minion_${targetId}`);
+
+      if (targetEl) {
+        setTimeout(() => {
+          targetEl.classList.add('damage-shake');
+          setTimeout(() => targetEl.classList.remove('damage-shake'), 380);
+        }, 150);
+      }
+    }
+
     function triggerDamageFX(targetEl, text, isHeal = false) {
       if (!targetEl) return;
       targetEl.classList.add('damage-shake');
@@ -473,12 +543,11 @@
       float.className = `floating-text absolute top-0 text-sm font-black z-50 ${isHeal ? 'text-emerald-400' : 'text-red-500'}`;
       float.innerText = text;
       targetEl.appendChild(float);
-      setTimeout(() => float.remove(), 1200);
+      setTimeout(() => float.remove(), 1100);
       haptic(isHeal ? 'light' : 'medium');
     }
 
     function handleServerSync(state) {
-      // Проверка урона по героям для анимации
       if (gameState) {
         if (state.opp.hp < gameState.opp.hp) triggerDamageFX(document.getElementById('oppHeroBox'), `-${gameState.opp.hp - state.opp.hp}`);
         if (state.me.hp < gameState.me.hp) triggerDamageFX(document.getElementById('myHeroBox'), `-${gameState.me.hp - state.me.hp}`);
@@ -492,7 +561,7 @@
       document.getElementById('battleOppName').innerText = state.opp.name;
       document.getElementById('oppHpBadge').innerText = state.opp.hp;
       document.getElementById('oppManaText').innerText = `${state.opp.currentMana}/${state.opp.maxMana}`;
-      document.getElementById('oppHandCount').innerText = state.opp.hand;
+      document.getElementById('oppHandCount').innerText = typeof state.opp.hand === 'number' ? state.opp.hand : state.opp.hand.length;
 
       document.getElementById('myBattleName').innerText = state.me.name;
       document.getElementById('myHpBadge').innerText = state.me.hp;
@@ -513,14 +582,15 @@
       const c = document.getElementById(containerId);
       c.innerHTML = minions.map(m => {
         const isSel = selectedBoardMinion === m.uid;
-        const canAtk = isMine && gameState?.isMyTurn && m.canAttack;
+        // ПОДСВЕТКА ТОЛЬКО ДЛЯ КАРТ С АТАКОЙ > 0
+        const canAtk = isMine && gameState?.isMyTurn && m.canAttack && m.atk > 0;
         return `
           <div id="minion_${m.uid}" onclick="${isMine ? `selectBoardMinion('${m.uid}')` : `targetOppMinion('${m.uid}')`}" 
                class="w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
             <span class="text-xl text-center">${m.icon}</span>
             <span class="text-[9px] font-bold text-center truncate">${m.name}</span>
             <div class="flex justify-between text-[11px] font-black">
-              <span class="text-amber-400">${m.atk}</span>
+              <span class="${m.atk > 0 ? 'text-amber-400' : 'text-slate-500'}">${m.atk}</span>
               <span class="text-red-400">${m.hp}</span>
             </div>
             ${m.taunt ? `<div class="absolute -top-1.5 -right-1 text-[10px]">🛡️</div>` : ''}
@@ -528,10 +598,6 @@
         `;
       }).join('');
     }
-
-    // --- МОБИЛЬНЫЙ DRAG AND DROP ДЛЯ КАРТ В РУКЕ ---
-    let draggedCard = null;
-    let dragEl = null;
 
     function renderBattleHand(hand) {
       const c = document.getElementById('myHand');
@@ -549,7 +615,7 @@
             <span class="text-[9px] font-bold text-center leading-tight truncate">${card.name}</span>
             ${card.type === 'minion' ? `
               <div class="flex justify-between text-[10px] font-black">
-                <span class="text-amber-400">${card.atk}</span>
+                <span class="${card.atk > 0 ? 'text-amber-400' : 'text-slate-500'}">${card.atk}</span>
                 <span class="text-red-400">${card.hp}</span>
               </div>` : `
               <div class="text-[8px] text-center font-bold text-indigo-400">Закл</div>`
@@ -560,6 +626,10 @@
 
       initHandTouchEvents();
     }
+
+    // Touch Drag & Drop
+    let draggedCard = null;
+    let dragEl = null;
 
     function initHandTouchEvents() {
       const cards = document.querySelectorAll('.hand-card-item');
@@ -582,7 +652,6 @@
       selectedBoardMinion = null;
 
       haptic('light');
-      // Приподнимаем карту над другими в руке
       this.style.transform = 'translateY(-24px) scale(1.15)';
       this.style.zIndex = '50';
       document.getElementById('myBoardDropZone').classList.add('drop-active');
@@ -601,8 +670,6 @@
       if (!draggedCard || !dragEl) return;
       const dropZone = document.getElementById('myBoardDropZone').getBoundingClientRect();
       const cardRect = dragEl.getBoundingClientRect();
-
-      // Проверяем сброс на стол
       const droppedOnBoard = cardRect.top < dropZone.bottom && cardRect.bottom > dropZone.top;
 
       dragEl.classList.remove('card-dragged');
@@ -614,7 +681,11 @@
 
       if (droppedOnBoard && draggedCard.type === 'minion') {
         haptic('medium');
-        socket.emit('play_card', { roomId: currentRoomId, cardUid: draggedCard.uid });
+        if (isBotMatch) {
+          playBotMatchMinion(draggedCard);
+        } else if (socket) {
+          socket.emit('play_card', { roomId: currentRoomId, cardUid: draggedCard.uid });
+        }
         selectedHandCard = null;
       }
 
@@ -625,7 +696,8 @@
     function selectBoardMinion(uid) {
       if (!gameState?.isMyTurn) return;
       const m = gameState.me.board.find(x => x.uid === uid);
-      if (m && m.canAttack) {
+      // Карты с 0 атаки нельзя выбрать для атаки
+      if (m && m.canAttack && m.atk > 0) {
         haptic('light');
         selectedBoardMinion = uid;
         selectedHandCard = null;
@@ -637,11 +709,20 @@
       if (!gameState?.isMyTurn) return;
       if (selectedBoardMinion) {
         haptic('heavy');
-        socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: 'opp_hero' });
+        triggerCardAttackAnimation(selectedBoardMinion, 'opp_hero');
+        if (isBotMatch) {
+          executeBotMatchAttack(selectedBoardMinion, 'opp_hero');
+        } else if (socket) {
+          socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: 'opp_hero' });
+        }
         selectedBoardMinion = null;
       } else if (selectedHandCard && selectedHandCard.type === 'spell') {
         haptic('medium');
-        socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'opp_hero' });
+        if (isBotMatch) {
+          playBotMatchSpell(selectedHandCard, 'opp_hero');
+        } else if (socket) {
+          socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'opp_hero' });
+        }
         selectedHandCard = null;
       }
     }
@@ -650,11 +731,20 @@
       if (!gameState?.isMyTurn) return;
       if (selectedBoardMinion) {
         haptic('heavy');
-        socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: uid });
+        triggerCardAttackAnimation(selectedBoardMinion, uid);
+        if (isBotMatch) {
+          executeBotMatchAttack(selectedBoardMinion, uid);
+        } else if (socket) {
+          socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: uid });
+        }
         selectedBoardMinion = null;
       } else if (selectedHandCard && selectedHandCard.type === 'spell') {
         haptic('medium');
-        socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: uid });
+        if (isBotMatch) {
+          playBotMatchSpell(selectedHandCard, uid);
+        } else if (socket) {
+          socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: uid });
+        }
         selectedHandCard = null;
       }
     }
@@ -662,27 +752,36 @@
     function targetMyHero() {
       if (selectedHandCard && selectedHandCard.type === 'spell' && selectedHandCard.heal) {
         haptic('light');
-        socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'my_hero' });
+        if (isBotMatch) {
+          playBotMatchSpell(selectedHandCard, 'my_hero');
+        } else if (socket) {
+          socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'my_hero' });
+        }
         selectedHandCard = null;
       }
     }
 
     function endTurn() {
-      if (gameState?.isMyTurn && socket) {
-        haptic('medium');
+      if (!gameState?.isMyTurn) return;
+      haptic('medium');
+      if (isBotMatch) {
+        gameState.isMyTurn = false;
+        handleServerSync(gameState);
+        runBotTurn();
+      } else if (socket) {
         socket.emit('end_turn', { roomId: currentRoomId });
       }
     }
 
     function handleGameOver(res) {
-      const isWin = res.winner === socket.id;
+      const isWin = res.winner === (isBotMatch ? 'player' : socket?.id);
       const prize = Math.floor(currentBet * 2 * 0.9);
       if (isWin) {
-        balance += prize;
+        if (!isBotMatch) balance += prize;
         haptic('success');
-        alert(`🏆 ПОБЕДА! Вы уничтожили героя соперника и выиграли ${prize} монет!`);
+        alert(`🏆 ПОБЕДА! Вы уничтожили героя соперника!`);
       } else {
-        balance -= currentBet;
+        if (!isBotMatch) balance -= currentBet;
         haptic('error');
         alert(`💀 ПОРАЖЕНИЕ! Ваш герой пал.`);
       }
@@ -691,8 +790,14 @@
       navigateTo('playScreen');
     }
 
-        // --- ПОЛНОЦЕННЫЙ РЕЖИМ ОБУЧЕНИЯ (БОЙ С БОТОМ) ---
-    let isBotMatch = false;
+    // --- ЛОГИКА ОДИНОЧНОГО БОЯ С БОТОМ (ОБУЧЕНИЕ) ---
+    function getCardData(id) {
+      if (typeof CARDS_DATABASE !== 'undefined') {
+        const c = CARDS_DATABASE.find(x => x.id === id);
+        if (c) return JSON.parse(JSON.stringify(c));
+      }
+      return { id, mana: 1, name: 'Карта', type: 'minion', atk: 1, hp: 1, icon: '🗡️' };
+    }
 
     function startPvE() {
       if (myDeck.length !== 15) return alert('Соберите колоду из 15 карт во вкладке "Моя колода"!');
@@ -739,26 +844,96 @@
       addCombatLog({ text: 'Тренировочный бой с Ботом начался!', icon: '🤖' });
     }
 
-    function getCardData(id) {
-      if (typeof CARDS_DATABASE !== 'undefined') {
-        const c = CARDS_DATABASE.find(x => x.id === id);
-        if (c) return JSON.parse(JSON.stringify(c));
-      }
-      return { id, mana: 1, name: 'Карта', type: 'minion', atk: 1, hp: 1, icon: '🗡️' };
+    function playBotMatchMinion(card) {
+      const p = gameState.me;
+      if (p.board.length >= 4 || p.currentMana < card.mana) return;
+      p.currentMana -= card.mana;
+      p.hand = p.hand.filter(c => c.uid !== card.uid);
+
+      p.board.push({
+        uid: card.uid,
+        name: card.name,
+        atk: card.atk,
+        hp: card.hp,
+        maxHp: card.hp,
+        icon: card.icon,
+        taunt: !!card.taunt,
+        canAttack: !!card.rush && card.atk > 0
+      });
+
+      if (card.healHero) p.hp = Math.min(25, p.hp + card.healHero);
+      if (card.enemyDmg) gameState.opp.hp -= card.enemyDmg;
+      if (card.draw && p.deck.length > 0 && p.hand.length < 6) p.hand.push(p.deck.pop());
+
+      addCombatLog({ text: `Вы призвали: ${card.name} (${card.atk}/${card.hp})`, icon: card.icon });
+      handleServerSync(gameState);
     }
 
-    // Ход бота
+    function playBotMatchSpell(card, targetId) {
+      const p = gameState.me;
+      const b = gameState.opp;
+      if (p.currentMana < card.mana) return;
+      p.currentMana -= card.mana;
+      p.hand = p.hand.filter(c => c.uid !== card.uid);
+
+      if (card.dmg) {
+        if (targetId === 'opp_hero') b.hp -= card.dmg;
+        else {
+          const tMinion = b.board.find(m => m.uid === targetId);
+          if (tMinion) tMinion.hp -= card.dmg;
+        }
+      }
+      if (card.heal && targetId === 'my_hero') {
+        p.hp = Math.min(25, p.hp + card.heal);
+      }
+      if (card.aoeDmg) {
+        b.board.forEach(m => { m.hp -= card.aoeDmg; });
+      }
+
+      b.board = b.board.filter(m => m.hp > 0);
+      addCombatLog({ text: `Вы сыграли заклинание: ${card.name}`, icon: card.icon });
+
+      if (b.hp <= 0) handleGameOver({ winner: 'player' });
+      else handleServerSync(gameState);
+    }
+
+    function executeBotMatchAttack(attackerUid, targetId) {
+      const p = gameState.me;
+      const b = gameState.opp;
+      const attacker = p.board.find(m => m.uid === attackerUid);
+      if (!attacker || !attacker.canAttack || attacker.atk <= 0) return;
+
+      const hasTaunt = b.board.some(m => m.taunt);
+      if (targetId === 'opp_hero') {
+        if (hasTaunt) return alert('Сначала уничтожьте существо с Провокацией 🛡️');
+        b.hp -= attacker.atk;
+        attacker.canAttack = false;
+        addCombatLog({ text: `${attacker.name} атакует героя Бота (-${attacker.atk} HP)`, icon: '💥' });
+      } else {
+        const defender = b.board.find(m => m.uid === targetId);
+        if (!defender || (hasTaunt && !defender.taunt)) return alert('Вы обязаны атаковать существо с Провокацией 🛡️');
+
+        defender.hp -= attacker.atk;
+        attacker.hp -= defender.atk;
+        attacker.canAttack = false;
+        addCombatLog({ text: `${attacker.name} ⚔️ ${defender.name} (-${attacker.atk}/-${defender.atk})`, icon: '⚔️' });
+      }
+
+      p.board = p.board.filter(m => m.hp > 0);
+      b.board = b.board.filter(m => m.hp > 0);
+
+      if (b.hp <= 0) handleGameOver({ winner: 'player' });
+      else handleServerSync(gameState);
+    }
+
     function runBotTurn() {
-      if (!isBotMatch) return;
       const b = gameState.opp;
       const p = gameState.me;
 
-      // Растет мана бота
       if (b.maxMana < 8) b.maxMana++;
       b.currentMana = b.maxMana;
-      b.board.forEach(m => { m.canAttack = true; });
+      b.board.forEach(m => { m.canAttack = (m.atk > 0); });
 
-      // Добор карты ботом
       if (b.deck.length > 0 && b.hiddenHand.length < 6) {
         b.hiddenHand.push(b.deck.pop());
         b.hand = b.hiddenHand.length;
@@ -768,7 +943,7 @@
       handleServerSync(gameState);
 
       setTimeout(() => {
-        // Бот выставляет карты, на которые хватает маны
+        // Бот выставляет существ
         for (let i = b.hiddenHand.length - 1; i >= 0; i--) {
           const card = b.hiddenHand[i];
           if (b.board.length < 4 && b.currentMana >= card.mana && card.type === 'minion') {
@@ -783,57 +958,58 @@
               maxHp: card.hp,
               icon: card.icon,
               taunt: !!card.taunt,
-              canAttack: !!card.rush
+              canAttack: !!card.rush && card.atk > 0
             });
             addCombatLog({ text: `Бот призвал: ${card.name} (${card.atk}/${card.hp})`, icon: card.icon });
           }
         }
         handleServerSync(gameState);
 
-        // Бот атакует
+        // Фаза атак бота
         setTimeout(() => {
           b.board.forEach(m => {
             if (!m.canAttack || m.atk <= 0) return;
             const pTaunt = p.board.find(x => x.taunt);
 
             if (pTaunt) {
+              triggerCardAttackAnimation(m.uid, pTaunt.uid);
               pTaunt.hp -= m.atk;
               m.hp -= pTaunt.atk;
               addCombatLog({ text: `${m.name} ⚔️ ${pTaunt.name} (-${m.atk}/-${pTaunt.atk})`, icon: '⚔️' });
-            } else if (p.board.length > 0 && Math.random() > 0.5) {
+            } else if (p.board.length > 0 && Math.random() > 0.4) {
               const targetMinion = p.board[0];
+              triggerCardAttackAnimation(m.uid, targetMinion.uid);
               targetMinion.hp -= m.atk;
               m.hp -= targetMinion.atk;
               addCombatLog({ text: `${m.name} ⚔️ ${targetMinion.name} (-${m.atk}/-${targetMinion.atk})`, icon: '⚔️' });
             } else {
+              triggerCardAttackAnimation(m.uid, 'my_hero');
               p.hp -= m.atk;
-              addCombatLog({ text: `${m.name} ударил вас в лицо (-${m.atk} HP)`, icon: '💥' });
+              addCombatLog({ text: `${m.name} атаковал вас в лицо (-${m.atk} HP)`, icon: '💥' });
             }
             m.canAttack = false;
           });
 
-          // Чистим погибших
           p.board = p.board.filter(x => x.hp > 0);
           b.board = b.board.filter(x => x.hp > 0);
 
-          // Проверка на победу/поражение
-          if (p.hp <= 0 || b.hp <= 0) {
-            handleGameOver({ winner: p.hp > 0 ? 'player' : 'bot' });
+          if (p.hp <= 0) {
+            handleGameOver({ winner: 'bot' });
             return;
           }
 
-          // Передача хода обратно игроку
+          // Передаем ход игроку
           if (p.maxMana < 8) p.maxMana++;
           p.currentMana = p.maxMana;
-          p.board.forEach(m => { m.canAttack = true; });
+          p.board.forEach(m => { m.canAttack = (m.atk > 0); });
           if (p.deck.length > 0 && p.hand.length < 6) p.hand.push(p.deck.pop());
 
           gameState.turn = 1;
           gameState.isMyTurn = true;
           addCombatLog({ text: 'Ваш ход!', icon: '⭐' });
           handleServerSync(gameState);
-        }, 1000);
-      }, 1000);
+        }, 1100);
+      }, 900);
     }
   </script>
 </body>
