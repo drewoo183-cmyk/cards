@@ -3,46 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Битва за Аванпосты</title>
+  <title>Арена Эфира CCG</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { user-select: none; -webkit-tap-highlight-color: transparent; }
-    .lane-active { border-color: #f59e0b !important; background-color: rgba(245, 158, 11, 0.08); }
+    .card-taunt { border-color: #cbd5e1 !important; box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+    .glow-green { box-shadow: 0 0 10px #22c55e; }
+    .glow-yellow { box-shadow: 0 0 12px #eab308; }
   </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex flex-col font-sans overflow-hidden">
 
-  <!-- ШАПКА -->
+  <!-- ВЕРХНЯЯ ШАПКА -->
   <header class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center z-10">
     <div class="flex items-center space-x-2">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center font-bold text-xs">🏰</div>
+      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center font-bold text-xs">⚔️</div>
       <span id="userName" class="font-bold text-sm">Игрок</span>
     </div>
-    <div class="flex items-center bg-slate-950 px-3 py-1.5 rounded-full border border-amber-500/30">
-      <span class="text-amber-400 font-extrabold text-sm mr-1" id="balanceText">200</span>
-      <span class="text-xs">🪙</span>
-      <button onclick="addCoins()" class="ml-2 text-xs bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded hover:bg-amber-500/40">➕</button>
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center bg-slate-950 px-3 py-1 rounded-full border border-amber-500/30">
+        <span class="text-amber-400 font-extrabold text-sm mr-1" id="balanceText">200</span>
+        <span class="text-xs">🪙</span>
+      </div>
+      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg">➕</button>
     </div>
   </header>
 
-  <!-- ЛОББИ -->
-  <main id="lobbyScreen" class="flex-1 flex flex-col p-4 overflow-y-auto space-y-4">
+  <!-- ПЕРЕКЛЮЧАТЕЛЬ ВКЛАДОК -->
+  <nav class="flex bg-slate-900 border-b border-slate-800 text-xs font-bold">
+    <button onclick="switchTab('lobbyTab')" id="tabBtnLobby" class="flex-1 py-3 border-b-2 border-amber-500 text-amber-400">ДУЭЛИ</button>
+    <button onclick="switchTab('deckTab')" id="tabBtnDeck" class="flex-1 py-3 border-b-2 border-transparent text-slate-400">МОЯ КОЛОДА (<span id="deckCountBadge">15/15</span>)</button>
+  </nav>
+
+  <!-- ВКЛАДКА 1: ЛОББИ ДУЭЛЕЙ -->
+  <div id="lobbyTab" class="flex-1 flex flex-col p-4 overflow-y-auto space-y-3">
     <div class="grid grid-cols-2 gap-3">
-      <button onclick="startPvE()" class="bg-gradient-to-br from-indigo-600 to-purple-800 p-4 rounded-2xl flex flex-col justify-between shadow-lg active:scale-95 transition text-left">
+      <button onclick="startPvE()" class="bg-gradient-to-br from-indigo-600 to-purple-800 p-3.5 rounded-2xl flex flex-col justify-between shadow-lg active:scale-95 text-left">
         <span class="text-2xl">🤖</span>
         <div>
-          <h3 class="font-bold text-sm mt-2">Бой с ботом</h3>
-          <p class="text-[11px] text-indigo-200">Тренировка на 3 линии</p>
+          <h3 class="font-bold text-sm mt-1">Обучение</h3>
+          <p class="text-[11px] text-indigo-200">Тренировка стола</p>
         </div>
       </button>
 
-      <button onclick="openCreateRoomModal()" class="bg-gradient-to-br from-emerald-600 to-teal-800 p-4 rounded-2xl flex flex-col justify-between shadow-lg active:scale-95 transition text-left">
+      <button onclick="openCreateRoomModal()" class="bg-gradient-to-br from-emerald-600 to-teal-800 p-3.5 rounded-2xl flex flex-col justify-between shadow-lg active:scale-95 text-left">
         <span class="text-2xl">➕</span>
         <div>
-          <h3 class="font-bold text-sm mt-2">Создать дуэль</h3>
-          <p class="text-[11px] text-emerald-200">Выставить ставку</p>
+          <h3 class="font-bold text-sm mt-1">Создать дуэль</h3>
+          <p class="text-[11px] text-emerald-200">Ставка монетами</p>
         </div>
       </button>
     </div>
@@ -55,124 +65,104 @@
     <div id="roomList" class="flex-1 space-y-2 overflow-y-auto">
       <div class="text-center py-10 text-slate-500 text-xs">Подключение к арене...</div>
     </div>
+  </div>
 
-    <button onclick="toggleModal('rulesModal', true)" class="w-full py-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 font-semibold">
-      📖 Правила 3-х линий и набора карт
-    </button>
-  </main>
-
-  <!-- АРЕНА НА 3 ЛИНИИ -->
-  <div id="battleArena" class="hidden fixed inset-0 bg-slate-950 z-20 flex flex-col justify-between p-3">
-    <!-- Верх оппонента -->
-    <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs">
-      <div class="flex items-center space-x-2">
-        <span class="text-base">🥷</span>
-        <span id="battleOppName" class="font-bold text-white">Противник</span>
+  <!-- ВКЛАДКА 2: МОЯ КОЛОДА (ДЕКБИЛДЕР) -->
+  <div id="deckTab" class="hidden flex-1 flex flex-col p-3 overflow-hidden">
+    <div class="flex justify-between items-center pb-2">
+      <div>
+        <h3 class="text-sm font-bold text-white">Составление колоды</h3>
+        <p class="text-[11px] text-slate-400">Нужно ровно 15 карт для участия</p>
       </div>
-      <div class="text-amber-400 font-bold">Банк: <span id="battlePot">0</span> 🪙</div>
-      <div class="bg-slate-800 px-2 py-1 rounded text-slate-300 font-bold" id="roundIndicator">Раунд 1/4</div>
+      <button onclick="saveDeck()" class="px-3 py-1.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow">Сохранить</button>
     </div>
 
-    <!-- 3 ЛИНИИ (АВАНПОСТЫ) -->
-    <div class="grid grid-cols-3 gap-2 my-2 flex-1">
-      <!-- Линия 0 -->
-      <div onclick="selectLane(0)" id="lane0" class="border-2 border-slate-800 bg-slate-900/60 rounded-2xl flex flex-col justify-between p-2 cursor-pointer transition">
-        <div class="text-[11px] text-center font-bold text-slate-400">Левый</div>
-        <div id="oppCards0" class="flex flex-wrap gap-1 justify-center min-h-[36px]"></div>
-        <div class="my-auto py-1 text-center bg-slate-950/80 rounded-lg border border-slate-800">
-          <span id="oppScore0" class="text-xs font-bold text-red-400">0</span>
-          <span class="text-[10px] text-slate-600 px-1">vs</span>
-          <span id="myScore0" class="text-xs font-bold text-emerald-400">0</span>
-        </div>
-        <div id="myCards0" class="flex flex-wrap gap-1 justify-center min-h-[36px]"></div>
-      </div>
+    <!-- Фильтр по мане -->
+    <div class="flex gap-1 overflow-x-auto py-1 text-xs">
+      <button onclick="filterMana('all')" class="px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300 font-bold">Все</button>
+      <button onclick="filterMana(1)" class="px-2.5 py-1 bg-slate-800 rounded-lg font-bold">1 💎</button>
+      <button onclick="filterMana(2)" class="px-2.5 py-1 bg-slate-800 rounded-lg font-bold">2 💎</button>
+      <button onclick="filterMana(3)" class="px-2.5 py-1 bg-slate-800 rounded-lg font-bold">3 💎</button>
+      <button onclick="filterMana(4)" class="px-2.5 py-1 bg-slate-800 rounded-lg font-bold">4 💎</button>
+      <button onclick="filterMana(5)" class="px-2.5 py-1 bg-slate-800 rounded-lg font-bold">5+ 💎</button>
+    </div>
 
-      <!-- Линия 1 -->
-      <div onclick="selectLane(1)" id="lane1" class="border-2 border-slate-800 bg-slate-900/60 rounded-2xl flex flex-col justify-between p-2 cursor-pointer transition">
-        <div class="text-[11px] text-center font-bold text-amber-400">Цитадель</div>
-        <div id="oppCards1" class="flex flex-wrap gap-1 justify-center min-h-[36px]"></div>
-        <div class="my-auto py-1 text-center bg-slate-950/80 rounded-lg border border-slate-800">
-          <span id="oppScore1" class="text-xs font-bold text-red-400">0</span>
-          <span class="text-[10px] text-slate-600 px-1">vs</span>
-          <span id="myScore1" class="text-xs font-bold text-emerald-400">0</span>
-        </div>
-        <div id="myCards1" class="flex flex-wrap gap-1 justify-center min-h-[36px]"></div>
-      </div>
+    <!-- Сетка коллекции всех 80 карт -->
+    <div id="collectionGrid" class="flex-1 overflow-y-auto grid grid-cols-3 gap-2 py-2 pr-1"></div>
+  </div>
 
-      <!-- Линия 2 -->
-      <div onclick="selectLane(2)" id="lane2" class="border-2 border-slate-800 bg-slate-900/60 rounded-2xl flex flex-col justify-between p-2 cursor-pointer transition">
-        <div class="text-[11px] text-center font-bold text-slate-400">Правый</div>
-        <div id="oppCards2" class="flex flex-wrap gap-1 justify-center min-h-[36px]"></div>
-        <div class="my-auto py-1 text-center bg-slate-950/80 rounded-lg border border-slate-800">
-          <span id="oppScore2" class="text-xs font-bold text-red-400">0</span>
-          <span class="text-[10px] text-slate-600 px-1">vs</span>
-          <span id="myScore2" class="text-xs font-bold text-emerald-400">0</span>
+  <!-- ЭКРАН СТОЛА МАТЧА (HEARTHSTONE ARENA) -->
+  <div id="battleArena" class="hidden fixed inset-0 bg-slate-950 z-30 flex flex-col justify-between p-2">
+    <!-- Оппонент: Герой и Мана -->
+    <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-2xl border border-slate-800">
+      <div onclick="targetOppHero()" id="oppHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl">
+        <div class="relative">
+          <div class="w-12 h-12 rounded-full bg-red-900/50 border-2 border-red-500 flex items-center justify-center text-xl">🥷</div>
+          <span id="oppHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-[11px] font-black px-1.5 py-0.5 rounded-full">25</span>
         </div>
-        <div id="myCards2" class="flex flex-wrap gap-1 justify-center min-h-[36px]"></div>
+        <div>
+          <div id="battleOppName" class="font-bold text-xs">Враг</div>
+          <div class="text-[10px] text-slate-400">Карт: <span id="oppHandCount">3</span></div>
+        </div>
+      </div>
+      <!-- Кристаллы маны оппонента -->
+      <div class="flex items-center space-x-1 text-cyan-400 font-bold text-xs bg-slate-950 px-2.5 py-1 rounded-full border border-cyan-500/30">
+        <span>💎</span><span id="oppManaText">1/1</span>
       </div>
     </div>
 
-    <!-- Панель статуса и подтверждения -->
-    <div class="flex items-center justify-between px-1 mb-2">
-      <div id="statusInstruction" class="text-xs text-amber-300 font-semibold">Выберите карту, затем линию</div>
-      <button id="readyBtn" onclick="confirmTurn()" class="hidden px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-lg active:scale-95 transition">
-        Готово ➔
+    <!-- Стол оппонента (макс 4 существа) -->
+    <div id="oppBoard" class="h-24 flex justify-center items-center gap-2 border-b border-dashed border-slate-800/80 my-1"></div>
+
+    <!-- Стол игрока (макс 4 существа) -->
+    <div id="myBoard" class="h-24 flex justify-center items-center gap-2 border-t border-dashed border-slate-800/80 my-1"></div>
+
+    <!-- Панель игрока: Герой, Мана, Кнопка конца хода -->
+    <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-2xl border border-slate-800">
+      <div onclick="targetMyHero()" id="myHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl">
+        <div class="relative">
+          <div class="w-12 h-12 rounded-full bg-emerald-900/50 border-2 border-emerald-500 flex items-center justify-center text-xl">🧙</div>
+          <span id="myHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-[11px] font-black px-1.5 py-0.5 rounded-full">25</span>
+        </div>
+        <div>
+          <div class="font-bold text-xs" id="myBattleName">Вы</div>
+          <div class="flex items-center space-x-1 text-cyan-400 font-bold text-xs">
+            <span>💎</span><span id="myManaText">1/1</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="endTurnBtn" onclick="endTurn()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-black text-xs rounded-xl shadow-lg active:scale-95 transition">
+        Конец хода
       </button>
     </div>
 
-    <!-- РУКА ИГРОКА (ФИКСИРОВАННЫЙ НАБОР) -->
-    <div id="cardsHand" class="flex justify-center gap-2 overflow-x-auto p-1 bg-slate-900/90 rounded-2xl border border-slate-800"></div>
+    <!-- Рука игрока -->
+    <div id="myHand" class="h-28 flex items-center gap-1.5 overflow-x-auto py-1 px-1 bg-slate-900/50 rounded-2xl border border-slate-800/60"></div>
   </div>
 
-  <!-- МОДАЛКА: СОЗДАНИЕ КОМНАТЫ СО СЛАЙДЕРОМ -->
-  <div id="createRoomModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4">
+  <!-- МОДАЛКА СОЗДАНИЯ КОМНАТЫ СО СТАВКОЙ -->
+  <div id="createRoomModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4">
       <h3 class="text-base font-bold text-center">Создание дуэли</h3>
       <div>
-        <div class="flex justify-between text-xs font-bold mb-2">
+        <div class="flex justify-between text-xs font-bold mb-1">
           <span class="text-slate-400">Ставка:</span>
           <span class="text-amber-400"><span id="betDisplay">50</span> 🪙</span>
         </div>
         <input type="range" id="betSlider" min="10" max="200" step="10" value="50" oninput="updateBet(this.value)" class="w-full accent-amber-500 bg-slate-950 rounded-lg h-2 cursor-pointer">
       </div>
-      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] space-y-1">
-        <div class="flex justify-between text-slate-400"><span>Общий банк:</span><span id="modalPot" class="text-white font-bold">100 🪙</span></div>
-        <div class="flex justify-between text-slate-400"><span>Выигрыш (-10%):</span><span id="modalWin" class="text-emerald-400 font-bold">90 🪙</span></div>
-      </div>
       <div class="flex gap-2">
-        <button onclick="toggleModal('createRoomModal', false)" class="flex-1 py-2.5 bg-slate-800 rounded-xl text-xs font-bold">Отмена</button>
-        <button onclick="confirmCreateRoom()" class="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-red-500 rounded-xl text-xs font-bold text-slate-950">Создать</button>
+        <button onclick="toggleModal('createRoomModal', false)" class="flex-1 py-2 bg-slate-800 rounded-xl text-xs font-bold">Отмена</button>
+        <button onclick="confirmCreateRoom()" class="flex-1 py-2 bg-gradient-to-r from-amber-500 to-red-500 rounded-xl text-xs font-bold text-slate-950">Создать</button>
       </div>
     </div>
   </div>
 
-  <!-- МОДАЛКА: ПРАВИЛА И КАРТЫ -->
-  <div id="rulesModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3 text-xs text-slate-300 max-h-[85vh] overflow-y-auto">
-      <h3 class="text-sm font-bold text-white text-center">Правила: «Битва за Аванпосты»</h3>
-      <p>Цель — захватить минимум <b>2 из 3 точек</b> по итогам 4 раундов.</p>
-      
-      <div class="border-t border-slate-800 pt-2 space-y-2">
-        <p class="font-bold text-amber-400">Фиксированная колода (6 карт):</p>
-        <div>⚔️ <b>Клинок (3) / 🪓 Секира (5) / 🐉 Дракон (7)</b> — оружие, даёт прямые очки силы.</div>
-        <div>🛡️ <b>Щит Света (0)</b> — парирует сильнейшую атаку врага на этой линии и переводит её очки вам!</div>
-        <div>🦹 <b>Шпион (1)</b> — ворует 4 очка силы, если враг поставил на эту линию Щит.</div>
-        <div>💣 <b>Мина (0)</b> — если у врага на линии $\ge 6$ силы, его карты полностью взрываются и сгорают.</div>
-      </div>
-
-      <div class="border-t border-slate-800 pt-2 text-[11px] text-slate-400">
-        • Раунд 1: 1 карта<br>
-        • Раунд 2: 1 карта<br>
-        • Раунд 3: 2 карты<br>
-        • Раунд 4: 2 оставшиеся карты
-      </div>
-      <button onclick="toggleModal('rulesModal', false)" class="w-full py-2.5 bg-slate-800 rounded-xl font-bold text-white mt-2">Понятно</button>
-    </div>
-  </div>
-
+  <script src="cardsData.js"></script>
   <script>
-    // ВСТАВЬ СЮДА СВОЮ ССЫЛКУ С RENDER (без косой черты в конце):
-    const SERVER_URL = "https://cards-server-b289.onrender.com";
+    // ВСТАВЬ СЮДА СВОЮ ССЫЛКУ С RENDER:
+    const SERVER_URL = "https://cards-server-xxxx.onrender.com";
 
     let tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
@@ -182,30 +172,32 @@
     let playerName = tg?.initDataUnsafe?.user?.first_name || localStorage.getItem('cards_name') || 'Игрок 1';
     let currentRoomId = null;
     let currentBet = 50;
-    let isPvP = false;
 
-    // Игровое состояние
-    let currentHand = [];
-    let plannedMoves = []; // [{ cardId, laneIndex }]
-    let selectedCardId = null;
-    let currentRound = 1;
-    let reqCardsCount = 1;
+    // Пользовательская колода (15 карт)
+    const defaultDeck = ['c1_1', 'c1_2', 'c1_3', 'c1_4', 'c2_1', 'c2_2', 'c2_4', 'c3_1', 'c3_2', 'c3_4', 'c4_1', 'c4_3', 'c5_1', 'c6_1', 'c8_1'];
+    let myDeck = JSON.parse(localStorage.getItem('cards_my_deck')) || defaultDeck;
+
+    // Состояние матча
+    let gameState = null;
+    let selectedHandCard = null;
+    let selectedBoardMinion = null;
 
     document.getElementById('userName').innerText = playerName;
     updateBalanceDisplay();
+    updateDeckBadge();
+    renderCollection('all');
 
     try {
       socket = io(SERVER_URL, { transports: ['websocket'], timeout: 3000 });
       socket.on('connect', () => socket.emit('get_lobby'));
       socket.on('lobby_update', renderRoomList);
       socket.on('room_created', ({ roomId }) => { currentRoomId = roomId; renderWaitingState(); });
-      socket.on('match_start', setupPvPMatch);
-      socket.on('opp_ready', () => { document.getElementById('statusInstruction').innerText = 'Противник сделал выбор! Заверши свой ход.'; });
-      socket.on('round_revealed', handleRoundResult);
+      socket.on('sync_state', (state) => handleServerSync(state));
+      socket.on('game_over', (res) => handleGameOver(res));
       socket.on('connect_error', () => {
-        document.getElementById('roomList').innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер временно оффлайн. Доступен "Бой с ботом".</div>`;
+        document.getElementById('roomList').innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер временно оффлайн.</div>`;
       });
-    } catch (e) { console.warn("Socket offline"); }
+    } catch(e) { console.warn("Socket offline"); }
 
     function updateBalanceDisplay() {
       document.getElementById('balanceText').innerText = balance;
@@ -217,16 +209,82 @@
     function addCoins() { balance += 100; updateBalanceDisplay(); }
     function toggleModal(id, show) { document.getElementById(id).classList.toggle('hidden', !show); }
 
-    function updateBet(val) {
-      currentBet = Number(val);
-      document.getElementById('betDisplay').innerText = val;
-      document.getElementById('modalPot').innerText = (val * 2) + ' 🪙';
-      document.getElementById('modalWin').innerText = Math.floor(val * 2 * 0.9) + ' 🪙';
+    function switchTab(tabId) {
+      document.getElementById('lobbyTab').classList.toggle('hidden', tabId !== 'lobbyTab');
+      document.getElementById('deckTab').classList.toggle('hidden', tabId !== 'deckTab');
+      document.getElementById('tabBtnLobby').className = tabId === 'lobbyTab' ? "flex-1 py-3 border-b-2 border-amber-500 text-amber-400" : "flex-1 py-3 border-b-2 border-transparent text-slate-400";
+      document.getElementById('tabBtnDeck').className = tabId === 'deckTab' ? "flex-1 py-3 border-b-2 border-amber-500 text-amber-400" : "flex-1 py-3 border-b-2 border-transparent text-slate-400";
+    }
+
+    // --- ЛОГИКА ДЕКБИЛДЕРА (80 КАРТ) ---
+    function updateDeckBadge() {
+      document.getElementById('deckCountBadge').innerText = `${myDeck.length}/15`;
+    }
+
+    function filterMana(mana) {
+      renderCollection(mana);
+    }
+
+    function renderCollection(filter) {
+      const grid = document.getElementById('collectionGrid');
+      if (typeof CARDS_DATABASE === 'undefined') return;
+
+      const filtered = CARDS_DATABASE.filter(c => {
+        if (filter === 'all') return true;
+        if (filter === 5) return c.mana >= 5;
+        return c.mana === filter;
+      });
+
+      grid.innerHTML = filtered.map(card => {
+        const inDeck = myDeck.includes(card.id);
+        return `
+          <div onclick="toggleCardInDeck('${card.id}')" class="relative rounded-xl border ${inDeck ? 'border-amber-400 bg-amber-950/20' : 'border-slate-800 bg-slate-900'} p-2 flex flex-col justify-between h-32 active:scale-95 transition cursor-pointer">
+            <div class="flex justify-between items-center">
+              <span class="w-5 h-5 rounded-full bg-cyan-600 text-white font-black text-[10px] flex items-center justify-center">${card.mana}</span>
+              <span class="text-lg">${card.icon}</span>
+            </div>
+            <div class="text-[10px] font-bold text-center leading-tight truncate">${card.name}</div>
+            <div class="text-[8px] text-slate-400 text-center leading-none">${card.desc}</div>
+            ${card.type === 'minion' ? `
+              <div class="flex justify-between text-[10px] font-black pt-1">
+                <span class="text-amber-400">⚔️${card.atk}</span>
+                <span class="text-red-400">❤️${card.hp}</span>
+              </div>` : `
+              <div class="text-[9px] text-center font-bold text-indigo-400">Заклинание</div>`
+            }
+            ${inDeck ? `<div class="absolute top-1 right-1 text-xs">✅</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleCardInDeck(cardId) {
+      const idx = myDeck.indexOf(cardId);
+      if (idx !== -1) {
+        myDeck.splice(idx, 1);
+      } else {
+        if (myDeck.length >= 15) return alert('Колода может содержать максимум 15 карт!');
+        myDeck.push(cardId);
+      }
+      updateDeckBadge();
+      renderCollection('all');
+    }
+
+    function saveDeck() {
+      if (myDeck.length !== 15) return alert('В колоде должно быть ровно 15 карт!');
+      localStorage.setItem('cards_my_deck', JSON.stringify(myDeck));
+      alert('Колода успешно сохранена!');
+    }
+
+    // --- ЛОББИ КОМНАТ ---
+    function updateBet(v) {
+      currentBet = Number(v);
+      document.getElementById('betDisplay').innerText = v;
     }
 
     function openCreateRoomModal() {
-      if (balance < 10) return alert('Нужно минимум 10 монет!');
-      updateBet(Math.min(50, balance));
+      if (myDeck.length !== 15) return alert('Сначала соберите колоду из 15 карт во вкладке "Моя колода"!');
+      if (balance < 10) return alert('Недостаточно монет!');
       toggleModal('createRoomModal', true);
     }
 
@@ -234,16 +292,14 @@
       if (balance < currentBet) return alert('Недостаточно монет!');
       toggleModal('createRoomModal', false);
       if (socket?.connected) {
-        socket.emit('create_room', { bet: currentBet, hostName: playerName });
-      } else {
-        alert('Сервер недоступен');
+        socket.emit('create_room', { bet: currentBet, hostName: playerName, deck: myDeck });
       }
     }
 
     function renderRoomList(rooms) {
       const c = document.getElementById('roomList');
       if (!rooms || rooms.length === 0) {
-        c.innerHTML = `<div class="text-center py-8 bg-slate-900/40 border border-slate-800 rounded-2xl text-xs text-slate-400">Нет активных комнат. Создай первую!</div>`;
+        c.innerHTML = `<div class="text-center py-8 bg-slate-900/40 border border-slate-800 rounded-2xl text-xs text-slate-400">Нет активных дуэлей. Создай первую!</div>`;
         return;
       }
       c.innerHTML = rooms.map(r => `
@@ -255,9 +311,11 @@
     }
 
     function joinRoom(roomId, bet) {
+      if (myDeck.length !== 15) return alert('Соберите колоду из 15 карт перед дуэлью!');
       if (balance < bet) return alert('Недостаточно монет!');
       currentRoomId = roomId;
-      if (socket?.connected) socket.emit('join_room', { roomId, guestName: playerName });
+      currentBet = bet;
+      if (socket?.connected) socket.emit('join_room', { roomId, guestName: playerName, deck: myDeck });
     }
 
     function renderWaitingState() {
@@ -279,228 +337,152 @@
 
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
-    // --- БОЕВАЯ СИСТЕМА НА 3 ЛИНИИ ---
-       function setupPvPMatch(data) {
-      isPvP = true;
-      if (data.roomId) currentRoomId = data.roomId;
-      currentBet = data.bet;
-      balance -= currentBet;
-      updateBalanceDisplay();
-
-      document.getElementById('battleOppName').innerText = data.oppName;
-      document.getElementById('battlePot').innerText = currentBet * 2;
-      document.getElementById('roundIndicator').innerText = `Раунд ${data.round}/4`;
-      document.getElementById('lobbyScreen').classList.add('hidden');
+    // --- БОЕВОЙ СТОЛ (HEARTHSTONE) ---
+    function handleServerSync(state) {
+      gameState = state;
       document.getElementById('battleArena').classList.remove('hidden');
 
-      currentHand = data.hand;
-      currentRound = data.round;
-      reqCardsCount = data.reqCards;
-      plannedMoves = [];
-      selectedCardId = null;
-      resetBoardUI();
-      renderHand();
+      // Обновляем данные оппонента
+      document.getElementById('battleOppName').innerText = state.opp.name;
+      document.getElementById('oppHpBadge').innerText = state.opp.hp;
+      document.getElementById('oppManaText').innerText = `${state.opp.currentMana}/${state.opp.maxMana}`;
+      document.getElementById('oppHandCount').innerText = state.opp.hand;
+
+      // Обновляем данные игрока
+      document.getElementById('myBattleName').innerText = state.me.name;
+      document.getElementById('myHpBadge').innerText = state.me.hp;
+      document.getElementById('myManaText').innerText = `${state.me.currentMana}/${state.me.maxMana}`;
+
+      // Кнопка хода
+      const endBtn = document.getElementById('endTurnBtn');
+      endBtn.disabled = !state.isMyTurn;
+      endBtn.className = state.isMyTurn 
+        ? "px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-black text-xs rounded-xl shadow-lg active:scale-95"
+        : "px-5 py-2.5 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed";
+
+      renderBoard(state.opp.board, 'oppBoard', false);
+      renderBoard(state.me.board, 'myBoard', true);
+      renderBattleHand(state.me.hand);
     }
 
-    function resetBoardUI() {
-      [0, 1, 2].forEach(i => {
-        document.getElementById(`myCards${i}`).innerHTML = '';
-        document.getElementById(`oppCards${i}`).innerHTML = '';
-        document.getElementById(`myScore${i}`).innerText = '0';
-        document.getElementById(`oppScore${i}`).innerText = '0';
-        document.getElementById(`lane${i}`).classList.remove('lane-active');
-      });
-      document.getElementById('readyBtn').classList.add('hidden');
-      document.getElementById('statusInstruction').innerText = `Положите ${reqCardsCount} карт(ы) на линии`;
-    }
-
-    function renderHand() {
-      const c = document.getElementById('cardsHand');
-      c.innerHTML = currentHand.map(card => {
-        const isPlanned = plannedMoves.some(m => m.cardId === card.id);
-        const isSel = selectedCardId === card.id;
-        if (isPlanned) return ''; // Карта уже временно лежит на линии
+    function renderBoard(minions, containerId, isMine) {
+      const c = document.getElementById(containerId);
+      c.innerHTML = minions.map(m => {
+        const isSel = selectedBoardMinion === m.uid;
+        const canAtk = isMine && gameState?.isMyTurn && m.canAttack;
         return `
-          <button onclick="selectCard('${card.id}')" class="w-14 h-20 rounded-xl border ${isSel ? 'border-amber-400 scale-105' : 'border-slate-700'} bg-slate-800 flex flex-col justify-between p-1.5 active:scale-95 transition flex-shrink-0 text-left">
-            <span class="text-[10px] font-black">${card.val > 0 ? '+' + card.val : ''}</span>
-            <span class="text-xl text-center">${card.icon}</span>
-            <span class="text-[8px] font-bold text-center truncate">${card.name}</span>
-          </button>`;
+          <div onclick="${isMine ? `selectBoardMinion('${m.uid}')` : `targetOppMinion('${m.uid}')`}" 
+               class="w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
+            <span class="text-xl text-center">${m.icon}</span>
+            <span class="text-[9px] font-bold text-center truncate">${m.name}</span>
+            <div class="flex justify-between text-[11px] font-black">
+              <span class="text-amber-400">${m.atk}</span>
+              <span class="text-red-400">${m.hp}</span>
+            </div>
+            ${m.taunt ? `<div class="absolute -top-1.5 -right-1 text-[10px]">🛡️</div>` : ''}
+          </div>
+        `;
       }).join('');
     }
 
-    function selectCard(cardId) {
-      selectedCardId = cardId;
-      renderHand();
-      document.getElementById('statusInstruction').innerText = 'Теперь выберите аванпост (Левый, Цитадель, Правый)';
+    function renderBattleHand(hand) {
+      const c = document.getElementById('myHand');
+      c.innerHTML = hand.map(card => {
+        const canPlay = gameState?.isMyTurn && gameState.me.currentMana >= card.mana;
+        const isSel = selectedHandCard?.uid === card.uid;
+        return `
+          <div onclick="selectHandCard('${card.uid}')" 
+               class="w-16 h-24 rounded-xl border ${isSel ? 'border-amber-400 scale-105' : 'border-slate-700'} ${canPlay ? 'border-emerald-500/80 bg-slate-900' : 'bg-slate-950 opacity-60'} p-1.5 flex flex-col justify-between flex-shrink-0 cursor-pointer active:scale-95 transition">
+            <div class="flex justify-between items-center">
+              <span class="w-4 h-4 rounded-full bg-cyan-600 text-white font-black text-[9px] flex items-center justify-center">${card.mana}</span>
+              <span class="text-base">${card.icon}</span>
+            </div>
+            <span class="text-[9px] font-bold text-center leading-tight truncate">${card.name}</span>
+            ${card.type === 'minion' ? `
+              <div class="flex justify-between text-[10px] font-black">
+                <span class="text-amber-400">${card.atk}</span>
+                <span class="text-red-400">${card.hp}</span>
+              </div>` : `
+              <div class="text-[8px] text-center font-bold text-indigo-400">Закл</div>`
+            }
+          </div>
+        `;
+      }).join('');
     }
 
-    function selectLane(laneIndex) {
-      if (!selectedCardId) return;
-      if (plannedMoves.length >= reqCardsCount) return;
+    function selectHandCard(uid) {
+      if (!gameState?.isMyTurn) return;
+      const card = gameState.me.hand.find(c => c.uid === uid);
+      if (!card || gameState.me.currentMana < card.mana) return;
 
-      const card = currentHand.find(c => c.id === selectedCardId);
-      plannedMoves.push({ cardId: selectedCardId, laneIndex, card });
-      selectedCardId = null;
+      selectedHandCard = card;
+      selectedBoardMinion = null;
 
-      // Отображаем карту рубашкой на выбранной линии
-      const slot = document.getElementById(`myCards${laneIndex}`);
-      slot.innerHTML += `<div class="w-7 h-9 rounded bg-indigo-700 border border-indigo-400 text-[10px] flex items-center justify-center font-bold">🎴</div>`;
-
-      renderHand();
-
-      if (plannedMoves.length === reqCardsCount) {
-        document.getElementById('readyBtn').classList.remove('hidden');
-        document.getElementById('statusInstruction').innerText = 'Нажмите «Готово» для закрытого хода!';
+      // Если это существо без таргета — сразу выставляем на стол
+      if (card.type === 'minion') {
+        socket.emit('play_card', { roomId: currentRoomId, cardUid: card.uid });
+        selectedHandCard = null;
       }
     }
 
-    function confirmTurn() {
-      document.getElementById('readyBtn').classList.add('hidden');
-      document.getElementById('statusInstruction').innerText = 'Ожидание оппонента...';
-
-      if (isPvP && socket) {
-        socket.emit('submit_moves', {
-          roomId: currentRoomId,
-          moves: plannedMoves.map(m => ({ cardId: m.cardId, laneIndex: m.laneIndex }))
-        });
-      } else {
-        runPvETurn();
+    function selectBoardMinion(uid) {
+      if (!gameState?.isMyTurn) return;
+      const m = gameState.me.board.find(x => x.uid === uid);
+      if (m && m.canAttack) {
+        selectedBoardMinion = uid;
+        selectedHandCard = null;
+        renderBoard(gameState.me.board, 'myBoard', true);
       }
     }
 
-    function handleRoundResult(data) {
-      // Обновляем линии и открываем карты
-      [0, 1, 2].forEach(i => {
-        const mySlot = document.getElementById(`myCards${i}`);
-        mySlot.innerHTML = (data.myLanes[i] || []).map(c => `
-          <div class="w-8 h-10 rounded bg-slate-800 border border-slate-700 text-[9px] flex flex-col items-center justify-center font-bold">
-            <span>${c.icon}</span><span>${c.val > 0 ? c.val : ''}</span>
-          </div>`).join('');
-
-        const oppSlot = document.getElementById(`oppCards${i}`);
-        oppSlot.innerHTML = (data.oppLanes[i] || []).map(c => `
-          <div class="w-8 h-10 rounded bg-slate-800 border border-red-500/50 text-[9px] flex flex-col items-center justify-center font-bold">
-            <span>${c.icon}</span><span>${c.val > 0 ? c.val : ''}</span>
-          </div>`).join('');
-
-        document.getElementById(`myScore${i}`).innerText = data.scores[i].my;
-        document.getElementById(`oppScore${i}`).innerText = data.scores[i].opp;
-      });
-
-      currentHand = data.hand;
-      currentRound = data.round;
-      reqCardsCount = data.reqCards;
-      plannedMoves = [];
-      selectedCardId = null;
-
-      if (data.isGameOver) {
-        setTimeout(() => checkGameWinner(data.scores), 1500);
-      } else {
-        document.getElementById('roundIndicator').innerText = `Раунд ${currentRound}/4`;
-        document.getElementById('statusInstruction').innerText = `Раунд ${currentRound}! Выберите ${reqCardsCount} карт(ы)`;
-        renderHand();
+    function targetOppHero() {
+      if (!gameState?.isMyTurn) return;
+      if (selectedBoardMinion) {
+        socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: 'opp_hero' });
+        selectedBoardMinion = null;
+      } else if (selectedHandCard && selectedHandCard.type === 'spell') {
+        socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'opp_hero' });
+        selectedHandCard = null;
       }
     }
 
-    function checkGameWinner(scores) {
-      let myWins = 0, oppWins = 0;
-      scores.forEach(s => {
-        if (s.my > s.opp) myWins++;
-        else if (s.opp > s.my) oppWins++;
-      });
+    function targetOppMinion(uid) {
+      if (!gameState?.isMyTurn) return;
+      if (selectedBoardMinion) {
+        socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: uid });
+        selectedBoardMinion = null;
+      } else if (selectedHandCard && selectedHandCard.type === 'spell') {
+        socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: uid });
+        selectedHandCard = null;
+      }
+    }
 
-      const pot = currentBet * 2;
-      const prize = Math.floor(pot * 0.9);
+    function targetMyHero() {
+      if (selectedHandCard && selectedHandCard.type === 'spell' && selectedHandCard.heal) {
+        socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'my_hero' });
+        selectedHandCard = null;
+      }
+    }
 
-      if (myWins >= 2) {
+    function endTurn() {
+      if (gameState?.isMyTurn && socket) {
+        socket.emit('end_turn', { roomId: currentRoomId });
+      }
+    }
+
+    function handleGameOver(res) {
+      const isWin = res.winner === socket.id;
+      const prize = Math.floor(currentBet * 2 * 0.9);
+      if (isWin) {
         balance += prize;
-        alert(`🏆 ПОБЕДА! Вы захватили ${myWins} из 3 зон и выиграли ${prize} монет!`);
-      } else if (oppWins >= 2) {
-        alert(`💀 ПОРАЖЕНИЕ! Враг захватил ${oppWins} зон.`);
+        alert(`🏆 ПОБЕДА! Вы уничтожили героя соперника и выиграли ${prize} монет!`);
       } else {
-        balance += currentBet;
-        alert(`🤝 НИЧЬЯ! Ставки возвращены.`);
+        balance -= currentBet;
+        alert(`💀 ПОРАЖЕНИЕ! Ваш герой пал.`);
       }
-
       updateBalanceDisplay();
       document.getElementById('battleArena').classList.add('hidden');
-      document.getElementById('lobbyScreen').classList.remove('hidden');
-      if (socket) socket.emit('get_lobby');
-    }
-
-    // Резервный PvE офлайн
-    let pveLanes = { p1: [[],[],[]], bot: [[],[],[]] };
-    let botHand = [];
-
-    function startPvE() {
-      isPvP = false;
-      currentBet = 20;
-      if (balance < currentBet) return alert('Нужно 20 монет!');
-      balance -= currentBet;
-      updateBalanceDisplay();
-
-      currentHand = [
-        { id: 'blade', name: 'Клинок', type: 'weapon', val: 3, icon: '⚔️' },
-        { id: 'axe', name: 'Секира', type: 'weapon', val: 5, icon: '🪓' },
-        { id: 'dragon', name: 'Дракон', type: 'weapon', val: 7, icon: '🐉' },
-        { id: 'shield', name: 'Щит', type: 'shield', val: 0, icon: '🛡️' },
-        { id: 'spy', name: 'Шпион', type: 'trap', val: 1, icon: '🦹' },
-        { id: 'mine', name: 'Мина', type: 'trap', val: 0, icon: '💣' }
-      ];
-      botHand = JSON.parse(JSON.stringify(currentHand));
-      pveLanes = { p1: [[],[],[]], bot: [[],[],[]] };
-
-      currentRound = 1;
-      reqCardsCount = 1;
-      plannedMoves = [];
-      selectedCardId = null;
-
-      document.getElementById('battleOppName').innerText = 'Бот-Стратег';
-      document.getElementById('battlePot').innerText = currentBet * 2;
-      document.getElementById('roundIndicator').innerText = `Раунд 1/4`;
-      document.getElementById('lobbyScreen').classList.add('hidden');
-      document.getElementById('battleArena').classList.remove('hidden');
-
-      resetBoardUI();
-      renderHand();
-    }
-
-    function runPvETurn() {
-      // Бот делает ход
-      for (let i = 0; i < reqCardsCount; i++) {
-        const rIdx = Math.floor(Math.random() * botHand.length);
-        const card = botHand.splice(rIdx, 1)[0];
-        const lIdx = Math.floor(Math.random() * 3);
-        pveLanes.bot[lIdx].push(card);
-      }
-
-      // Применяем ход игрока
-      plannedMoves.forEach(m => {
-        const cIdx = currentHand.findIndex(c => c.id === m.cardId);
-        const card = currentHand.splice(cIdx, 1)[0];
-        pveLanes.p1[m.laneIndex].push(card);
-      });
-
-      // Считаем очки
-      const scores = [0, 1, 2].map(idx => {
-        const p1Score = pveLanes.p1[idx].reduce((a, b) => a + b.val, 0);
-        const oppScore = pveLanes.bot[idx].reduce((a, b) => a + b.val, 0);
-        return { my: p1Score, opp: oppScore };
-      });
-
-      currentRound++;
-      const isGameOver = currentRound > 4;
-
-      handleRoundResult({
-        myLanes: pveLanes.p1,
-        oppLanes: pveLanes.bot,
-        scores,
-        hand: currentHand,
-        round: currentRound,
-        reqCards: currentRound === 2 ? 1 : 2,
-        isGameOver
-      });
+      refreshLobby();
     }
   </script>
 </body>
