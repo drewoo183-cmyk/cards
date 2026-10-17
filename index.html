@@ -19,15 +19,47 @@
     }
     .card-taunt {
       border-color: #cbd5e1 !important;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
-    .glow-green { box-shadow: 0 0 10px #22c55e; }
-    .glow-yellow { box-shadow: 0 0 12px #eab308; }
+    .glow-green { box-shadow: 0 0 12px #22c55e; }
+    .glow-yellow { box-shadow: 0 0 14px #eab308; }
+
+    /* Анимации */
+    .damage-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+      40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+
+    .floating-text {
+      animation: floatUp 1.2s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-35px) scale(1.3); }
+    }
+
+    .card-dragged {
+      position: fixed !important;
+      pointer-events: none !important;
+      z-index: 100 !important;
+      transform: scale(1.15) !important;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 15px #38bdf8 !important;
+      transition: none !important;
+    }
+
+    .drop-active {
+      border-color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.1) !important;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex flex-col font-sans">
 
-  <!-- ВЕРХНЯЯ ШАПКА -->
+  <!-- ШАПКА -->
   <header class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center sticky top-0 z-20">
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center font-bold text-xs">⚔️</div>
@@ -38,7 +70,7 @@
         <span class="text-amber-400 font-extrabold text-sm mr-1" id="balanceText">200</span>
         <span class="text-xs">🪙</span>
       </div>
-      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg hover:bg-amber-500/40">➕</button>
+      <button onclick="addCoins()" class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg">➕</button>
     </div>
   </header>
 
@@ -46,36 +78,32 @@
   <main id="mainMenuScreen" class="flex-1 flex flex-col justify-center p-6 space-y-4 max-w-md mx-auto w-full">
     <div class="text-center space-y-1 mb-4">
       <h1 class="text-2xl font-black bg-gradient-to-r from-amber-400 via-orange-400 to-indigo-400 bg-clip-text text-transparent">АРЕНА ЭФИРА</h1>
-      <p class="text-xs text-slate-400">Коллекционная карточная онлайн-дуэль</p>
+      <p class="text-xs text-slate-400">Коллекционная дуэль существ и магии</p>
     </div>
 
-    <!-- КНОПКА: ИГРАТЬ -->
     <button onclick="navigateTo('playScreen')" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl font-black text-slate-950 text-base shadow-lg shadow-emerald-950/40 active:scale-95 transition flex items-center justify-center gap-2">
       <span class="text-xl">⚔️</span> ИГРАТЬ
     </button>
 
-    <!-- КНОПКА: МОЯ КОЛОДА -->
     <button onclick="navigateTo('deckScreen')" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl font-black text-white text-base shadow-lg shadow-indigo-950/40 active:scale-95 transition flex items-center justify-center gap-2">
       <span class="text-xl">🎴</span> МОЯ КОЛОДА (<span id="menuDeckBadge">15/15</span>)
     </button>
 
-    <!-- КНОПКА: ПРАВИЛА -->
-    <button onclick="toggleModal('rulesModal', true)" class="w-full py-3.5 bg-slate-900 border border-slate-800 rounded-2xl font-bold text-slate-300 text-sm hover:text-white active:scale-95 transition flex items-center justify-center gap-2">
+    <button onclick="toggleModal('rulesModal', true)" class="w-full py-3.5 bg-slate-900 border border-slate-800 rounded-2xl font-bold text-slate-300 text-sm active:scale-95 transition flex items-center justify-center gap-2">
       <span class="text-base">📜</span> ПРАВИЛА
     </button>
   </main>
 
-  <!-- ЭКРАН 2: ВЫБОР РЕЖИМА ИГРЫ (PvE / PvP) -->
+  <!-- ЭКРАН 2: РЕЖИМЫ ИГРЫ -->
   <div id="playScreen" class="hidden flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
     <div class="flex items-center justify-between">
       <button onclick="navigateTo('mainMenuScreen')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-bold">
-        ⬅ Назад в меню
+        ⬅ В меню
       </button>
       <span class="text-xs font-bold text-slate-300">ВЫБОР РЕЖИМА</span>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-      <!-- PvE -->
       <button onclick="startPvE()" class="bg-gradient-to-br from-indigo-600 to-purple-800 p-4 rounded-2xl flex flex-col justify-between shadow-lg active:scale-95 text-left h-32">
         <span class="text-2xl">🤖</span>
         <div>
@@ -84,7 +112,6 @@
         </div>
       </button>
 
-      <!-- PvP: Создать -->
       <button onclick="openCreateRoomModal()" class="bg-gradient-to-br from-emerald-600 to-teal-800 p-4 rounded-2xl flex flex-col justify-between shadow-lg active:scale-95 text-left h-32">
         <span class="text-2xl">➕</span>
         <div>
@@ -104,9 +131,8 @@
     </div>
   </div>
 
-  <!-- ЭКРАН 3: МОЯ КОЛОДА (ПОЛНЫЙ СКРОЛЛ ВНИЗ) -->
+  <!-- ЭКРАН 3: МОЯ КОЛОДА -->
   <div id="deckScreen" class="hidden flex-1 flex flex-col p-4 space-y-3 max-w-md mx-auto w-full">
-    <!-- Шапка колоды -->
     <div class="flex items-center justify-between">
       <button onclick="navigateTo('mainMenuScreen')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-bold">
         ⬅ Назад в меню
@@ -119,59 +145,65 @@
     <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex justify-between items-center">
       <div>
         <div class="text-xs font-bold text-white">Колода героя</div>
-        <div class="text-[11px] text-slate-400">Требуется ровно 15 карт</div>
+        <div class="text-[11px] text-slate-400">Нужно ровно 15 карт</div>
       </div>
       <div class="text-sm font-black text-amber-400" id="deckCountBadge">15/15</div>
     </div>
 
-    <!-- Фильтры по мане -->
-    <div class="flex gap-1.5 overflow-x-auto py-1 text-xs no-scrollbar">
-      <button onclick="filterMana('all')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 font-bold active:bg-slate-800">Все</button>
-      <button onclick="filterMana(1)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold active:bg-slate-800">1 💎</button>
-      <button onclick="filterMana(2)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold active:bg-slate-800">2 💎</button>
-      <button onclick="filterMana(3)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold active:bg-slate-800">3 💎</button>
-      <button onclick="filterMana(4)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold active:bg-slate-800">4 💎</button>
-      <button onclick="filterMana(5)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold active:bg-slate-800">5+ 💎</button>
+    <div class="flex gap-1.5 overflow-x-auto py-1 text-xs">
+      <button onclick="filterMana('all')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 font-bold">Все</button>
+      <button onclick="filterMana(1)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold">1 💎</button>
+      <button onclick="filterMana(2)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold">2 💎</button>
+      <button onclick="filterMana(3)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold">3 💎</button>
+      <button onclick="filterMana(4)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold">4 💎</button>
+      <button onclick="filterMana(5)" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-bold">5+ 💎</button>
     </div>
 
-    <!-- Сетка коллекции со свободным скроллом -->
     <div id="collectionGrid" class="flex-1 custom-scroll grid grid-cols-3 gap-2 pb-10"></div>
   </div>
 
-  <!-- ЭКРАН 4: СТОЛ МАТЧА (HEARTHSTONE) -->
+  <!-- ЭКРАН 4: СТОЛ МАТЧА С БОКОВЫМ ЛОГОМ И АНИМАЦИЯМИ -->
   <div id="battleArena" class="hidden fixed inset-0 bg-slate-950 z-30 flex flex-col justify-between p-2">
-    <!-- Оппонент -->
+    <!-- Верх: Оппонент + Кнопка истории боя -->
     <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-2xl border border-slate-800">
-      <div onclick="targetOppHero()" id="oppHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl">
+      <div onclick="targetOppHero()" id="oppHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl transition">
         <div class="relative">
-          <div class="w-12 h-12 rounded-full bg-red-900/50 border-2 border-red-500 flex items-center justify-center text-xl">🥷</div>
-          <span id="oppHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-[11px] font-black px-1.5 py-0.5 rounded-full">25</span>
+          <div class="w-11 h-11 rounded-full bg-red-900/50 border-2 border-red-500 flex items-center justify-center text-xl">🥷</div>
+          <span id="oppHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full">25</span>
         </div>
         <div>
-          <div id="battleOppName" class="font-bold text-xs">Враг</div>
-          <div class="text-[10px] text-slate-400">Карт: <span id="oppHandCount">3</span></div>
+          <div id="battleOppName" class="font-bold text-xs truncate max-w-[90px]">Враг</div>
+          <div class="text-[9px] text-slate-400">Карт: <span id="oppHandCount">3</span></div>
         </div>
       </div>
-      <div class="flex items-center space-x-1 text-cyan-400 font-bold text-xs bg-slate-950 px-2.5 py-1 rounded-full border border-cyan-500/30">
-        <span>💎</span><span id="oppManaText">1/1</span>
+
+      <div class="flex items-center gap-2">
+        <button onclick="toggleCombatLog()" class="px-2 py-1 bg-slate-800 rounded-lg border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1 active:scale-95">
+          📜 <span id="lastLogBrief" class="truncate max-w-[80px]">Бой начался</span>
+        </button>
+        <div class="flex items-center space-x-1 text-cyan-400 font-bold text-xs bg-slate-950 px-2 py-1 rounded-full border border-cyan-500/30">
+          <span>💎</span><span id="oppManaText">1/1</span>
+        </div>
       </div>
     </div>
 
-    <!-- Стол оппонента -->
+    <!-- Стол оппонента (4 слота) -->
     <div id="oppBoard" class="h-24 flex justify-center items-center gap-2 border-b border-dashed border-slate-800/80 my-1"></div>
 
-    <!-- Стол игрока -->
-    <div id="myBoard" class="h-24 flex justify-center items-center gap-2 border-t border-dashed border-slate-800/80 my-1"></div>
+    <!-- Зона розыгрыша стола игрока (Drop Zone для Drag-and-drop) -->
+    <div id="myBoardDropZone" class="h-24 flex justify-center items-center gap-2 border border-dashed border-slate-800/80 rounded-xl my-1 transition-all">
+      <div id="myBoard" class="w-full h-full flex justify-center items-center gap-2"></div>
+    </div>
 
-    <!-- Панель игрока -->
+    <!-- Панель игрока: Мана, Герой, Кнопка хода -->
     <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-2xl border border-slate-800">
-      <div onclick="targetMyHero()" id="myHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl">
+      <div onclick="targetMyHero()" id="myHeroBox" class="flex items-center space-x-2 cursor-pointer p-1 rounded-xl transition">
         <div class="relative">
-          <div class="w-12 h-12 rounded-full bg-emerald-900/50 border-2 border-emerald-500 flex items-center justify-center text-xl">🧙</div>
-          <span id="myHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-[11px] font-black px-1.5 py-0.5 rounded-full">25</span>
+          <div class="w-11 h-11 rounded-full bg-emerald-900/50 border-2 border-emerald-500 flex items-center justify-center text-xl">🧙</div>
+          <span id="myHpBadge" class="absolute -bottom-1 -right-1 bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full">25</span>
         </div>
         <div>
-          <div class="font-bold text-xs" id="myBattleName">Вы</div>
+          <div class="font-bold text-xs truncate max-w-[90px]" id="myBattleName">Вы</div>
           <div class="flex items-center space-x-1 text-cyan-400 font-bold text-xs">
             <span>💎</span><span id="myManaText">1/1</span>
           </div>
@@ -183,8 +215,17 @@
       </button>
     </div>
 
-    <!-- Рука игрока -->
-    <div id="myHand" class="h-28 flex items-center gap-1.5 overflow-x-auto py-1 px-1 bg-slate-900/50 rounded-2xl border border-slate-800/60 custom-scroll"></div>
+    <!-- Рука игрока с поддержкой Touch Drag -->
+    <div id="myHand" class="h-28 flex items-center gap-1.5 overflow-x-auto py-1 px-1 bg-slate-900/50 rounded-2xl border border-slate-800/60 custom-scroll relative"></div>
+  </div>
+
+  <!-- БОКОВОЙ ВЫДВИЖНОЙ ЛОГ БОЯ -->
+  <div id="combatLogDrawer" class="hidden fixed top-14 left-2 right-2 bg-slate-900/95 border border-slate-700 backdrop-blur-md rounded-2xl p-3 z-40 shadow-2xl max-h-60 flex flex-col">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-1 mb-2">
+      <span class="text-xs font-bold text-amber-400">История ходов</span>
+      <button onclick="toggleCombatLog()" class="text-xs text-slate-400 hover:text-white">✕</button>
+    </div>
+    <div id="combatLogList" class="flex-1 custom-scroll space-y-1.5 text-[11px] text-slate-300 pr-1"></div>
   </div>
 
   <!-- МОДАЛКА: СОЗДАНИЕ ДУЭЛИ -->
@@ -208,14 +249,13 @@
   <!-- МОДАЛКА: ПРАВИЛА -->
   <div id="rulesModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-3 text-xs text-slate-300 max-h-[85vh] custom-scroll">
-      <h3 class="text-base font-bold text-white text-center">Правила: Арена Эфира</h3>
-      <p>Пошаговая дуэль до уничтожения героя противника (25 HP).</p>
-      
+      <h3 class="text-base font-bold text-white text-center">Правила Арены Эфира</h3>
+      <p>Цель: снизить здоровье героя соперника до 0 HP.</p>
       <div class="border-t border-slate-800 pt-2 space-y-1.5">
         <p>💎 <b>Мана:</b> растет от 1 до 8 кристаллов каждый ход.</p>
-        <p>🛡️ <b>Провокация:</b> враг обязан атаковать это существо, пока оно живо.</p>
-        <p>⚡ <b>Рывок:</b> существо может атаковать вражеских миньонов в ход призыва.</p>
-        <p>⚔️ <b>Размен:</b> при ударе существа наносят урон друг другу одновременно.</p>
+        <p>🖐️ <b>Розыгрыш:</b> поднимите карту пальцем и перетащите на стол!</p>
+        <p>🛡️ <b>Провокация:</b> защищает героя, пока не будет уничтожена.</p>
+        <p>⚡ <b>Рывок:</b> атакует вражеских миньонов в ход призыва.</p>
       </div>
       <button onclick="toggleModal('rulesModal', false)" class="w-full py-2.5 bg-slate-800 rounded-xl font-bold text-white mt-2">Понятно</button>
     </div>
@@ -229,27 +269,31 @@
     let tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
+    function haptic(type = 'light') {
+      try { tg?.HapticFeedback?.impactOccurred(type); } catch (e) {}
+    }
+
     let socket = null;
     let balance = Number(localStorage.getItem('cards_balance')) || 200;
     let playerName = tg?.initDataUnsafe?.user?.first_name || localStorage.getItem('cards_name') || 'Игрок 1';
     let currentRoomId = null;
     let currentBet = 50;
 
-    // Пользовательская колода
     const defaultDeck = ['c1_1', 'c1_2', 'c1_3', 'c1_4', 'c2_1', 'c2_2', 'c2_4', 'c3_1', 'c3_2', 'c3_4', 'c4_1', 'c4_3', 'c5_1', 'c6_1', 'c8_1'];
     let myDeck = JSON.parse(localStorage.getItem('cards_my_deck')) || defaultDeck;
 
     let gameState = null;
     let selectedHandCard = null;
     let selectedBoardMinion = null;
+    let combatLogs = [];
 
     document.getElementById('userName').innerText = playerName;
     updateBalanceDisplay();
     updateDeckBadges();
     renderCollection('all');
 
-    // Навигация по экранам
     function navigateTo(screenId) {
+      haptic('light');
       ['mainMenuScreen', 'playScreen', 'deckScreen'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
       });
@@ -263,10 +307,11 @@
       socket.on('lobby_update', renderRoomList);
       socket.on('room_created', ({ roomId }) => { currentRoomId = roomId; renderWaitingState(); });
       socket.on('sync_state', (state) => handleServerSync(state));
+      socket.on('combat_log', (entry) => addCombatLog(entry));
       socket.on('game_over', (res) => handleGameOver(res));
       socket.on('connect_error', () => {
         const rl = document.getElementById('roomList');
-        if (rl) rl.innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер временно оффлайн. Доступен режим с ботом.</div>`;
+        if (rl) rl.innerHTML = `<div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center text-xs text-amber-400">Сервер оффлайн. Доступно Обучение с ботом.</div>`;
       });
     } catch(e) { console.warn("Socket offline"); }
 
@@ -277,7 +322,7 @@
       if (slider) slider.max = Math.max(balance, 10);
     }
 
-    function addCoins() { balance += 100; updateBalanceDisplay(); }
+    function addCoins() { balance += 100; updateBalanceDisplay(); haptic('medium'); }
     function toggleModal(id, show) { document.getElementById(id).classList.toggle('hidden', !show); }
 
     // --- ДЕКБИЛДЕР ---
@@ -323,10 +368,10 @@
     }
 
     function toggleCardInDeck(cardId) {
+      haptic('light');
       const idx = myDeck.indexOf(cardId);
-      if (idx !== -1) {
-        myDeck.splice(idx, 1);
-      } else {
+      if (idx !== -1) myDeck.splice(idx, 1);
+      else {
         if (myDeck.length >= 15) return alert('В колоде уже 15 карт!');
         myDeck.push(cardId);
       }
@@ -337,18 +382,15 @@
     function saveDeck() {
       if (myDeck.length !== 15) return alert('Для дуэли нужно ровно 15 карт!');
       localStorage.setItem('cards_my_deck', JSON.stringify(myDeck));
-      alert('Колода успешно сохранена!');
+      haptic('success');
+      alert('Колода сохранена!');
       navigateTo('mainMenuScreen');
     }
 
-    // --- ЛОББИ ДУЭЛЕЙ ---
-    function updateBet(v) {
-      currentBet = Number(v);
-      document.getElementById('betDisplay').innerText = v;
-    }
-
+    // --- ЛОББИ ---
+    function updateBet(v) { currentBet = Number(v); document.getElementById('betDisplay').innerText = v; }
     function openCreateRoomModal() {
-      if (myDeck.length !== 15) return alert('Соберите колоду из 15 карт!');
+      if (myDeck.length !== 15) return alert('Соберите 15 карт во вкладке "Моя колода"!');
       if (balance < 10) return alert('Недостаточно монет!');
       toggleModal('createRoomModal', true);
     }
@@ -403,8 +445,46 @@
 
     function refreshLobby() { if (socket?.connected) socket.emit('get_lobby'); }
 
-    // --- БОЕВОЙ СТОЛ ---
+    // --- БОЕВОЙ СТОЛ И ИСТОРИЯ ---
+    function addCombatLog(entry) {
+      combatLogs.unshift(entry);
+      if (combatLogs.length > 20) combatLogs.pop();
+      document.getElementById('lastLogBrief').innerText = entry.text;
+
+      const list = document.getElementById('combatLogList');
+      list.innerHTML = combatLogs.map(l => `
+        <div class="p-1.5 bg-slate-950/60 rounded-lg border border-slate-800/80 flex items-center gap-1.5">
+          <span>${l.icon || '⚔️'}</span>
+          <span class="flex-1">${l.text}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleCombatLog() {
+      document.getElementById('combatLogDrawer').classList.toggle('hidden');
+    }
+
+    function triggerDamageFX(targetEl, text, isHeal = false) {
+      if (!targetEl) return;
+      targetEl.classList.add('damage-shake');
+      setTimeout(() => targetEl.classList.remove('damage-shake'), 400);
+
+      const float = document.createElement('div');
+      float.className = `floating-text absolute top-0 text-sm font-black z-50 ${isHeal ? 'text-emerald-400' : 'text-red-500'}`;
+      float.innerText = text;
+      targetEl.appendChild(float);
+      setTimeout(() => float.remove(), 1200);
+      haptic(isHeal ? 'light' : 'medium');
+    }
+
     function handleServerSync(state) {
+      // Проверка урона по героям для анимации
+      if (gameState) {
+        if (state.opp.hp < gameState.opp.hp) triggerDamageFX(document.getElementById('oppHeroBox'), `-${gameState.opp.hp - state.opp.hp}`);
+        if (state.me.hp < gameState.me.hp) triggerDamageFX(document.getElementById('myHeroBox'), `-${gameState.me.hp - state.me.hp}`);
+        if (state.me.hp > gameState.me.hp) triggerDamageFX(document.getElementById('myHeroBox'), `+${state.me.hp - gameState.me.hp}`, true);
+      }
+
       gameState = state;
       document.getElementById('playScreen').classList.add('hidden');
       document.getElementById('battleArena').classList.remove('hidden');
@@ -435,7 +515,7 @@
         const isSel = selectedBoardMinion === m.uid;
         const canAtk = isMine && gameState?.isMyTurn && m.canAttack;
         return `
-          <div onclick="${isMine ? `selectBoardMinion('${m.uid}')` : `targetOppMinion('${m.uid}')`}" 
+          <div id="minion_${m.uid}" onclick="${isMine ? `selectBoardMinion('${m.uid}')` : `targetOppMinion('${m.uid}')`}" 
                class="w-16 h-22 rounded-xl border-2 ${m.taunt ? 'card-taunt' : 'border-slate-700'} ${canAtk ? 'glow-green' : ''} ${isSel ? 'glow-yellow' : ''} bg-slate-900 p-1 flex flex-col justify-between relative cursor-pointer active:scale-95 transition">
             <span class="text-xl text-center">${m.icon}</span>
             <span class="text-[9px] font-bold text-center truncate">${m.name}</span>
@@ -449,14 +529,19 @@
       }).join('');
     }
 
+    // --- МОБИЛЬНЫЙ DRAG AND DROP ДЛЯ КАРТ В РУКЕ ---
+    let draggedCard = null;
+    let dragEl = null;
+
     function renderBattleHand(hand) {
       const c = document.getElementById('myHand');
       c.innerHTML = hand.map(card => {
         const canPlay = gameState?.isMyTurn && gameState.me.currentMana >= card.mana;
         const isSel = selectedHandCard?.uid === card.uid;
         return `
-          <div onclick="selectHandCard('${card.uid}')" 
-               class="w-16 h-24 rounded-xl border ${isSel ? 'border-amber-400 scale-105' : 'border-slate-700'} ${canPlay ? 'border-emerald-500/80 bg-slate-900' : 'bg-slate-950 opacity-60'} p-1.5 flex flex-col justify-between flex-shrink-0 cursor-pointer active:scale-95 transition">
+          <div id="handcard_${card.uid}"
+               data-uid="${card.uid}"
+               class="hand-card-item w-16 h-24 rounded-xl border ${isSel ? 'border-amber-400 -translate-y-4 shadow-xl shadow-amber-400/40 z-10' : 'border-slate-700'} ${canPlay ? 'border-emerald-500/80 bg-slate-900' : 'bg-slate-950 opacity-60'} p-1.5 flex flex-col justify-between flex-shrink-0 cursor-pointer transition-all duration-200">
             <div class="flex justify-between items-center">
               <span class="w-4 h-4 rounded-full bg-cyan-600 text-white font-black text-[9px] flex items-center justify-center">${card.mana}</span>
               <span class="text-base">${card.icon}</span>
@@ -472,26 +557,76 @@
           </div>
         `;
       }).join('');
+
+      initHandTouchEvents();
     }
 
-    function selectHandCard(uid) {
+    function initHandTouchEvents() {
+      const cards = document.querySelectorAll('.hand-card-item');
+      cards.forEach(cardEl => {
+        cardEl.addEventListener('touchstart', onTouchStart, { passive: false });
+        cardEl.addEventListener('touchmove', onTouchMove, { passive: false });
+        cardEl.addEventListener('touchend', onTouchEnd);
+      });
+    }
+
+    function onTouchStart(e) {
       if (!gameState?.isMyTurn) return;
+      const uid = this.getAttribute('data-uid');
       const card = gameState.me.hand.find(c => c.uid === uid);
       if (!card || gameState.me.currentMana < card.mana) return;
 
+      draggedCard = card;
+      dragEl = this;
       selectedHandCard = card;
       selectedBoardMinion = null;
 
-      if (card.type === 'minion') {
-        socket.emit('play_card', { roomId: currentRoomId, cardUid: card.uid });
+      haptic('light');
+      // Приподнимаем карту над другими в руке
+      this.style.transform = 'translateY(-24px) scale(1.15)';
+      this.style.zIndex = '50';
+      document.getElementById('myBoardDropZone').classList.add('drop-active');
+    }
+
+    function onTouchMove(e) {
+      if (!draggedCard || !dragEl) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      dragEl.classList.add('card-dragged');
+      dragEl.style.left = `${touch.clientX - 32}px`;
+      dragEl.style.top = `${touch.clientY - 48}px`;
+    }
+
+    function onTouchEnd(e) {
+      if (!draggedCard || !dragEl) return;
+      const dropZone = document.getElementById('myBoardDropZone').getBoundingClientRect();
+      const cardRect = dragEl.getBoundingClientRect();
+
+      // Проверяем сброс на стол
+      const droppedOnBoard = cardRect.top < dropZone.bottom && cardRect.bottom > dropZone.top;
+
+      dragEl.classList.remove('card-dragged');
+      dragEl.style.left = '';
+      dragEl.style.top = '';
+      dragEl.style.transform = '';
+      dragEl.style.zIndex = '';
+      document.getElementById('myBoardDropZone').classList.remove('drop-active');
+
+      if (droppedOnBoard && draggedCard.type === 'minion') {
+        haptic('medium');
+        socket.emit('play_card', { roomId: currentRoomId, cardUid: draggedCard.uid });
         selectedHandCard = null;
       }
+
+      draggedCard = null;
+      dragEl = null;
     }
 
     function selectBoardMinion(uid) {
       if (!gameState?.isMyTurn) return;
       const m = gameState.me.board.find(x => x.uid === uid);
       if (m && m.canAttack) {
+        haptic('light');
         selectedBoardMinion = uid;
         selectedHandCard = null;
         renderBoard(gameState.me.board, 'myBoard', true);
@@ -501,9 +636,11 @@
     function targetOppHero() {
       if (!gameState?.isMyTurn) return;
       if (selectedBoardMinion) {
+        haptic('heavy');
         socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: 'opp_hero' });
         selectedBoardMinion = null;
       } else if (selectedHandCard && selectedHandCard.type === 'spell') {
+        haptic('medium');
         socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'opp_hero' });
         selectedHandCard = null;
       }
@@ -512,9 +649,11 @@
     function targetOppMinion(uid) {
       if (!gameState?.isMyTurn) return;
       if (selectedBoardMinion) {
+        haptic('heavy');
         socket.emit('attack', { roomId: currentRoomId, attackerUid: selectedBoardMinion, targetId: uid });
         selectedBoardMinion = null;
       } else if (selectedHandCard && selectedHandCard.type === 'spell') {
+        haptic('medium');
         socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: uid });
         selectedHandCard = null;
       }
@@ -522,6 +661,7 @@
 
     function targetMyHero() {
       if (selectedHandCard && selectedHandCard.type === 'spell' && selectedHandCard.heal) {
+        haptic('light');
         socket.emit('play_card', { roomId: currentRoomId, cardUid: selectedHandCard.uid, targetId: 'my_hero' });
         selectedHandCard = null;
       }
@@ -529,6 +669,7 @@
 
     function endTurn() {
       if (gameState?.isMyTurn && socket) {
+        haptic('medium');
         socket.emit('end_turn', { roomId: currentRoomId });
       }
     }
@@ -538,9 +679,11 @@
       const prize = Math.floor(currentBet * 2 * 0.9);
       if (isWin) {
         balance += prize;
+        haptic('success');
         alert(`🏆 ПОБЕДА! Вы уничтожили героя соперника и выиграли ${prize} монет!`);
       } else {
         balance -= currentBet;
+        haptic('error');
         alert(`💀 ПОРАЖЕНИЕ! Ваш герой пал.`);
       }
       updateBalanceDisplay();
@@ -548,9 +691,8 @@
       navigateTo('playScreen');
     }
 
-    // Режим с ботом
     function startPvE() {
-      alert('Тренировочный режим с ботом: используйте PvP-комнаты для полноценной пошаговой дуэли на двоих!');
+      alert('Тренировочный режим: используйте PvP-комнаты дуэлей для тестирования всех анимаций в онлайне!');
     }
   </script>
 </body>
